@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet } from 'react-native';
+import styles from './styles'; 
+import { View, Text } from 'react-native';
 
 export default function LeaderboardScreen() {
   return (
@@ -6,12 +7,4 @@ export default function LeaderboardScreen() {
       <Text>Leaderboard screen</Text>
     </View>
   );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
+};
