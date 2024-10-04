@@ -13,7 +13,7 @@ export default function RootLayout() {
         },
       }}>
       <Stack.Screen name="index" />
-      <Stack.Screen name="question" />
+      <Stack.Screen name="Quiz" />
       <Stack.Screen name="leaderboard" />
     </Stack>
   );

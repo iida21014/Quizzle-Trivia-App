@@ -9,8 +9,8 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     backgroundColor: '#fff',   // White background for the content area
-    padding: 20,               
-    borderRadius: 10,          
+    padding: 20,
+    borderRadius: 10,
   },
   title: {
     fontSize: 24,
@@ -21,16 +21,16 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: '#65558F', // Button color
-    width: 200,                 
-    height: 50,                 
-    borderRadius: 25,           
-    justifyContent: 'center',    
-    alignItems: 'center',      
+    width: 200,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginVertical: 10,        // Space between buttons
   },
   buttonText: {
     color: '#fff',             // White text color
-    fontSize: 16,              
+    fontSize: 16,
   },
 });
 
