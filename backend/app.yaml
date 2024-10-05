@@ -1,2 +1,4 @@
 runtime: nodejs20
-env: standard
+
+env_variables:
+  MONGODB_URI: 'mongodb+srv://databaseUser:IZMLlahATVA1P9zv@cluster0.cgvmo.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
