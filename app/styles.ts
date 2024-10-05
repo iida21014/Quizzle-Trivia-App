@@ -32,6 +32,19 @@ const styles = StyleSheet.create({
     color: '#fff',             // White text color
     fontSize: 16,
   },
+  leaderboardItem:{
+    width: 200,
+    flexDirection: 'row',     // Aligns items horizontally
+    justifyContent: 'space-between',  // Puts space between the username and points
+    padding: 10,
+    borderBottomWidth: 1,     // Adds a bottom border to separate items
+    borderBottomColor: '#ccc',// Light gray border color
+  },
+
+  leaderboardStyle:{
+    flexGrow: 0,    // Prevents FlatList from expanding vertically
+
+  }
 });
 
 export default styles;
