@@ -36,6 +36,21 @@ app.get('/items', async (req, res) => {
   }
 });
 
+// GET  TOP 10
+app.get('/leaderboard', async (req, res) => {
+   try {
+      const leaderboard = await itemsCollection
+                                  .find()
+                                  .sort({ score: -1 }) // Sort by points descending
+                                  .limit(10)            // Limit to top 10
+                                  .toArray();
+      res.json(leaderboard); // Send the top 10 sorted entries to the frontend
+   } catch (err) {
+     res.status(500).send('Error fetching items');
+   }
+ });
+ 
+
 // POST to database
 app.post('/items', async (req, res) => {
   try {
