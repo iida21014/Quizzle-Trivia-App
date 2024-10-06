@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocalSearchParams } from 'expo-router';
 import { View } from 'react-native';
 import { decode } from 'he';
 import styles from './styles';
@@ -14,15 +15,18 @@ function shuffleArray(array) {
 }
 
 export default function Quiz() {
-  // Stores the current index of the question
-  const [questionIndex, setQuestionIndex] = useState(0);
+  // App navigates to this component from CreateQuiz view. CreateQuiz adds these parameters when navigating.
+  const { difficulty, numberOfQuestions, categoryId } = useLocalSearchParams();  
+
+  // State to store the current index of the question
+  const [questionIndex, setQuestionIndex] = useState();
   
-  // This will contain a set of questions to be used
+  // State that contains a set of questions to be used
   const [questions, setQuestions] = useState([]);
 
-  // This will store the alternative the user chooses
+  // State that stores the alternative the user chooses
   const [pickedAlternative, setAlternative] = useState();
-
+  
   // State to store the token
   const [token, setToken] = useState(null);
 
@@ -50,7 +54,21 @@ export default function Quiz() {
     }
 
     try {
-      const response = await fetch(`https://opentdb.com/api.php?amount=10&token=${token}`);
+      let url = `https://opentdb.com/api.php?amount=${numberOfQuestions}&token=${token}`;
+  
+      // If difficulty is all, we don't want to filter difficulties
+      if (difficulty !== 'all') {
+        url += `&difficulty=${difficulty}`;
+      }
+
+      // If categoryId is 0, not specifying category when fetching questions
+      // (Category with id 0 means all categories). 
+      // If categoryId is something else, place id to the url.
+      if (categoryId !== '0') {
+        url += `&category=${categoryId}`;
+      }
+
+      const response = await fetch(url);
       const data = await response.json();
 
       // If the token is expired (response_code === 4), regenerate it
@@ -63,17 +81,21 @@ export default function Quiz() {
 
       // If questions are fetched successfully
       if (data.response_code === 0) {
+        // Transform data from opentdb into format which application uses
         const questions = data.results.map(({ question, correct_answer, incorrect_answers }) => {
-          const alternatives = shuffleArray([...incorrect_answers, correct_answer])
-            .map(alternative => decode(alternative));
+          let alternatives = [...incorrect_answers, correct_answer]
+          alternatives = shuffleArray(alternatives);
 
+          // Decoding HTML-escaped elements like &quot;
           return {
             question: decode(question),
-            alternatives,
+            alternatives: alternatives.map(alternative => decode(alternative)),
             correctAlternative: decode(correct_answer),
           };
         });
 
+        // Starting game from the first question
+        setQuestionIndex(0);
         setQuestions(questions);
       } else {
         console.error('Error fetching quiz questions');
@@ -114,13 +136,14 @@ export default function Quiz() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.contentContainer}>
-        {questions.length > 0 && (
+      <View style={styles.contentContainerFull}>
+        {questions.length > 0 && questionIndex != null && (
           <QuestionCard
             questionIndex={questionIndex}
             questionData={questions[questionIndex]}
             pickedAlternative={pickedAlternative}
             onPickAlternative={pickAnswer}
+            numberOfQuestions={questions.length}
           />
         )}
       </View>

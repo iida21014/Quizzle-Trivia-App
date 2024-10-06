@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react';
-import { Dimensions, View, Text, StyleSheet, Pressable  } from 'react-native';
+import { View, Text, StyleSheet, Pressable  } from 'react-native';
 import styles from './styles';
 
-export function QuestionCard({ questionData, questionIndex, pickedAlternative, onPickAlternative }) {
+export function QuestionCard({ questionData, questionIndex, pickedAlternative, onPickAlternative, numberOfQuestions }) {
   const { question, alternatives, correctAlternative } = questionData;
   
   // Function which composes the style of the button
@@ -29,9 +28,9 @@ export function QuestionCard({ questionData, questionIndex, pickedAlternative, o
   }
 
   return (
-    <View style={cardStyles.card}>
-      <Text style={styles.title}>Question {questionIndex + 1}:</Text>
-      <Text style={styles.title}>{question}</Text>
+    <View>
+      <Text style={styles.title}>Question {questionIndex + 1} / {numberOfQuestions}:</Text>
+      <Text style={{ ...styles.title2, textAlign: 'center'}}>{question}</Text>
 
       {/* Rendering alternatives of a question */}
       {alternatives.map((alternative, index) => (
@@ -48,17 +47,7 @@ export function QuestionCard({ questionData, questionIndex, pickedAlternative, o
   );
 }
 
-// Getting screen dimensions in order to resize white background
-// https://reactnative.dev/docs/dimensions
-const screenDimensions = Dimensions.get('window');
-const screenWidth = screenDimensions.width;
-const screenHeight = screenDimensions.height;
-
 const cardStyles = StyleSheet.create({
-  card: {
-    width: screenWidth - 90,
-    height: screenHeight - 150,
-  },
   questionAlternative: {
     borderColor: 'black',
     borderWidth: 1,

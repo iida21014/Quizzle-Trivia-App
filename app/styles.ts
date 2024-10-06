@@ -1,4 +1,10 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
+
+// Getting screen dimensions in order to resize white background
+// https://reactnative.dev/docs/dimensions
+const screenDimensions = Dimensions.get('window');
+const screenWidth = screenDimensions.width;
+const screenHeight = screenDimensions.height;
 
 const styles = StyleSheet.create({
   container: {
@@ -12,11 +18,25 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
   },
+  contentContainerFull: {
+    backgroundColor: '#fff',   // White background for the content area
+    padding: 20,
+    borderRadius: 10,
+    width: screenWidth - 90,
+    height: screenHeight - 150,
+  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
     textAlign: 'center',
+    marginBottom: 20,
+  },
+  title2: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'left',
     marginBottom: 20,
   },
   logo: {

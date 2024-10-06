@@ -12,9 +12,10 @@ export default function RootLayout() {
           fontWeight: 'bold',
         },
       }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="Quiz" />
-      <Stack.Screen name="leaderboard" />
+      <Stack.Screen options={{ title: 'Home' }} name="index" />
+      <Stack.Screen options={{ title: 'Create a Quiz'}} name="createQuiz" />
+      <Stack.Screen options={{ title: 'Quiz' }} name="quiz" />
+      <Stack.Screen options={{ title: 'Leaderboard' }} name="leaderboard" />
     </Stack>
   );
 }
