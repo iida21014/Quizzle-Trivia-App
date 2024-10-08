@@ -16,7 +16,7 @@ const LoginScreen = () => {
       // Log the username and password before sending the request
       console.log('Logging in with:', { username, password });
   
-      const response = await fetch('http://localhost:3000/login', {
+      const response = await fetch('https://quizzleapp.lm.r.appspot.com/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
