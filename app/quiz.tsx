@@ -14,6 +14,28 @@ function shuffleArray(array) {
   return array;
 }
 
+const maximumTimeToAnswerInMilliseconds = 15000;
+
+const maxPointsForAnswer = {
+  easy: 700,
+  medium: 850,
+  hard: 1000,
+};
+
+// Calculates the number of points based on the difficulty of question and time which elapsed during answering.
+function calculatePoints(answerTimeInMilliSeconds, questionDifficulty) {
+  if (answerTimeInMilliSeconds >= maximumTimeToAnswerInMilliseconds) {
+    return 0;
+  }
+
+  // Calculating, how many percent of the maximum answer time was elapsed and subtracting the same proportion from maximum points.
+  // For example if maximum time is 5000 milliseconds and answer time was 1000 milliseconds, subtracting 20 percent from the maximum points.
+  const answerTimeCoefficient = 1.0 - (answerTimeInMilliSeconds / maximumTimeToAnswerInMilliseconds)
+  const maxPoints = maxPointsForAnswer[questionDifficulty];
+  
+  return Math.round(maxPoints * answerTimeCoefficient); // Rounding the result to integers
+}
+
 export default function Quiz() {
   const { difficulty, numberOfQuestions, categoryId } = useLocalSearchParams();
   const context = useContext(TokenContext);
@@ -25,12 +47,34 @@ export default function Quiz() {
 
   const { token, regenerateToken } = context;
 
+  const [playerPoints, setPlayerPoints] = useState(0); // State to have the points player has got
+  const [answerPoints, setAnswerPoints] = useState(0); // State to have the points had from the current question
+  const [questionAskedAt, setQuestionAskedAt] = useState(new Date());
   const [questionIndex, setQuestionIndex] = useState(0);
   const [questions, setQuestions] = useState([]);
   const [pickedAlternative, setAlternative] = useState(null);
   const [showResult, setShowResult] = useState(false); // State to show result of answer
+  const [showTimeout, setShowTimeout] = useState(false); // State to show the timeout message
 
   console.log('Accessing token from context:', token);
+
+  // Waits for 2 seconds and then clears UI and shows the next question
+  function moveOnToNextQuestion() {
+    setTimeout(() => {
+      if (questionIndex < questions.length - 1) {
+        setQuestionIndex((prevIndex) => prevIndex + 1);
+      } else {
+        console.log('Quiz Finished!');
+        console.log('Player points ', playerPoints);
+      }
+
+      // Clear the selected answer and result display
+      setAlternative(null);
+      setShowResult(false);
+      setShowTimeout(false);
+      setQuestionAskedAt(new Date());
+    }, 2000); // Show result for 2 second before proceeding to the next question
+  }
 
   async function generateQuiz() {
     if (!token) {
@@ -59,7 +103,7 @@ export default function Quiz() {
       }
 
       if (data.response_code === 0) {
-        const questions = data.results.map(({ question, correct_answer, incorrect_answers }) => {
+        const questions = data.results.map(({ question, correct_answer, incorrect_answers, difficulty }) => {
           let alternatives = [...incorrect_answers, correct_answer];
           alternatives = shuffleArray(alternatives);
 
@@ -67,6 +111,7 @@ export default function Quiz() {
             question: decode(question),
             alternatives: alternatives.map(alternative => decode(alternative)),
             correctAlternative: decode(correct_answer),
+            difficulty,
           };
         });
 
@@ -79,6 +124,38 @@ export default function Quiz() {
     }
   }
 
+  // Functionality to show timeout text and correct alternative if maximum time has been elapsed.
+  useEffect(() => {
+    // Function inside interval is run every 200 milliseconds
+    const interval = setInterval(() => {
+
+      // Calculating the time elapsed after the question was asked
+      const timeElapsedInMilliseconds = new Date().getTime() - questionAskedAt.getTime();
+
+      // If player has already picked an answer, disabling timeout mechanism
+      if (pickedAlternative != null) {
+        clearInterval(interval);
+        return;
+      }
+
+      // Do nothing if there is still time to pick an answer
+      if (timeElapsedInMilliseconds <= maximumTimeToAnswerInMilliseconds) {
+        return;
+      }
+
+      // Show the correct answer to the player (and also disable the UI for a few seconds)
+      setAlternative(questions[questionIndex].correctAlternative);
+      setShowTimeout(true);
+      moveOnToNextQuestion();
+
+      // After timeout there is no need to run this code anymore.
+      clearInterval(interval);
+    }, 200);
+
+    // Returning cleanup function for effect which clears the interval
+    return () => clearInterval(interval);
+  }, [questionAskedAt, questions, pickedAlternative]);
+
   useEffect(() => {
     if (token && questions.length === 0) {
       generateQuiz();
@@ -90,28 +167,20 @@ export default function Quiz() {
     if (pickedAlternative !== null) return; // Prevent selecting another answer if already answered
 
     setAlternative(alternative);
-    const isCorrect = alternative === questions[questionIndex].correctAlternative;
+    const isAnswerCorrect = alternative === questions[questionIndex].correctAlternative;
 
     // Show the result for a short period before moving to the next question
     setShowResult(true);
-    setTimeout(() => {
-      if (isCorrect) {
-        console.log("Correct Answer!");
-      } else {
-        console.log("Incorrect Answer!");
-      }
-      
-      // Move to the next question
-      if (questionIndex < questions.length - 1) {
-        setQuestionIndex((prevIndex) => prevIndex + 1);
-      } else {
-        console.log("Quiz Finished!");
-      }
 
-      // Clear the selected answer and result display
-      setAlternative(null);
-      setShowResult(false);
-    }, 1000); // Show result for 1 second before proceeding to the next question
+    const answerTimeInMilliSeconds = new Date().getTime() - questionAskedAt.getTime();
+
+    if (isAnswerCorrect) {
+      const answerPoints = calculatePoints(answerTimeInMilliSeconds, questions[questionIndex].difficulty);
+      setAnswerPoints(answerPoints);
+      setPlayerPoints(currentPoints => currentPoints + answerPoints);
+    }
+    
+    moveOnToNextQuestion();
   };
 
   return (
@@ -130,9 +199,17 @@ export default function Quiz() {
                 numberOfQuestions={questions.length}
               />
               {showResult && (
-                <Text style={styles.resultText}>
-                  {pickedAlternative === questions[questionIndex].correctAlternative ? "Correct!" : "Incorrect!"}
-                </Text>
+                <View>
+                  <Text style={styles.resultText}>
+                    {pickedAlternative === questions[questionIndex].correctAlternative ? "Correct!" : "Incorrect!"}
+                  </Text>
+                  {pickedAlternative === questions[questionIndex].correctAlternative && (
+                    <Text>You got {answerPoints} points.</Text>
+                  )}
+                </View>
+              )}
+              {showTimeout && (
+                <Text style={{ fontWeight: 'bold' }}>Time's up!</Text>
               )}
             </>
           )}
