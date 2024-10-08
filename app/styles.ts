@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   leaderboardItem:{
-    width: 200,
+    width: '100%',
     flexDirection: 'row',     // Aligns items horizontally
     justifyContent: 'space-between',  // Puts space between the username and points
     padding: 10,
@@ -68,9 +68,25 @@ const styles = StyleSheet.create({
   },
 
   leaderboardStyle:{
-    flexGrow: 0,    // Prevents FlatList from expanding vertically
+    flex: 1,
+    // flexGrow: 0,    // Prevents FlatList from expanding vertically
+  },
 
+/*
+an attempt to get the category picker to be next to text
+  leaderboardPicker:{
+    flexDirection: "row",
+    justifyContent: 'space-between', 
+  },
+ */
+  picker: {
+    marginBottom: 5,
+  },
+  startButtonContainer: {
+    marginTop: 10,
+    alignItems: 'center',
   }
+
 });
 
 export default styles;

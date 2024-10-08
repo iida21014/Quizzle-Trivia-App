@@ -32,13 +32,13 @@ export default function CreateQuiz() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.contentContainerFull}>
+      <View style={styles.contentContainer}>
         <Text style={styles.title}>Create a Quiz</Text>
 
         {/* Picker to choose a difficulty for the quiz */}
         <Text style={styles.title2}>Difficulty</Text>
         <Picker
-            style={quizFormStyles.picker}
+            style={styles.picker}
             selectedValue={selectedDifficulty}
             onValueChange={(itemValue) =>
               setSelectedDifficulty(itemValue)
@@ -52,7 +52,7 @@ export default function CreateQuiz() {
         {/* Picker to choose the category of questions for the quiz */}
         <Text style={styles.title2}>Category</Text>
         <Picker
-          style={quizFormStyles.picker}
+          style={styles.picker}
           selectedValue={selectedCategoryId}
           onValueChange={(itemValue) => setSelectedCategoryId(itemValue)}
         >          
@@ -60,7 +60,7 @@ export default function CreateQuiz() {
         </Picker>
 
         {/* A button for starting a quiz. Basically a link to the quiz route with given parameters */}
-        <View style={quizFormStyles.startButtonContainer}>
+        <View style={styles.startButtonContainer}>
           <View style={styles.button}>
             <Link
               style={styles.buttonText}
@@ -77,12 +77,4 @@ export default function CreateQuiz() {
   )
 }
 
-const quizFormStyles = StyleSheet.create({
-  picker: {
-    marginBottom: 5,
-  },
-  startButtonContainer: {
-    marginTop: 10,
-    alignItems: 'center',
-  }
-});
+;

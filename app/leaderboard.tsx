@@ -1,11 +1,30 @@
 import {useState, useEffect} from 'react';
 import styles from './styles'; 
 import { View, Text, FlatList, ActivityIndicator, Alert } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 
 export default function LeaderboardScreen() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true); // For loading state
   const [error, setError] = useState(null);     // For error handling
+
+
+  const categories = [
+    { id: 0, name: 'All' },
+    { id: 10, name: 'Books' },
+    { id: 11, name: 'Films' },
+    { id: 12, name: 'Music' },
+    { id: 14, name: 'Television' },
+    { id: 17, name: 'Science & Nature' },
+    { id: 18, name: 'Computers' },
+    { id: 19, name: 'Mathematics' },
+    { id: 21, name: 'Sports' },
+    { id: 22, name: 'Geography' },
+    { id: 23, name: 'History' },
+  ];
+
+   // State for category
+   const [selectedCategoryId, setSelectedCategoryId] = useState(0);
 
   // Function to fetch leaderboard data from the API
   const fetchLeaderboard = async () => {
@@ -53,8 +72,19 @@ export default function LeaderboardScreen() {
   // Render the leaderboard
   return (
     <View style={styles.container}>
-      <View style={styles.contentContainer}>
-        <FlatList style={styles.leaderboardStyle}
+      <View style={styles.contentContainerFull}>
+      <Text style={styles.title}>TOP 10 scores</Text>
+        {/* Picker to choose the category of the leaderboard */}
+        <Text>From the category:</Text>
+        <Picker
+          selectedValue={selectedCategoryId}
+          onValueChange={(itemValue) => setSelectedCategoryId(itemValue)}
+        >          
+          {categories.map(({ id, name }) => (<Picker.Item key={id} label={name} value={id} />  ))}
+        </Picker>
+        
+        
+         <FlatList style={styles.leaderboardStyle}
           keyExtractor={keyHandler}
           data={leaderboard}
           renderItem={renderLeaderboard}
