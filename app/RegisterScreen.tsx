@@ -12,7 +12,7 @@ const RegisterScreen = () => {
   const handleRegister = async () => {
     setLoading(true);
     try {
-      const response = await fetch('https://quizzleapp.lm.r.appspot.com/register', {
+      const response = await fetch('http://localhost:3000/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
