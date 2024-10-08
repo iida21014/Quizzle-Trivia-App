@@ -7,6 +7,7 @@ export default function LeaderboardScreen() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true); // For loading state
   const [error, setError] = useState(null);     // For error handling
+  const [selectedCategoryId, setSelectedCategoryId] = useState(0); // State for category
 
 
   const categories = [
@@ -23,27 +24,36 @@ export default function LeaderboardScreen() {
     { id: 23, name: 'History' },
   ];
 
-   // State for category
-   const [selectedCategoryId, setSelectedCategoryId] = useState(0);
+  
 
-  // Function to fetch leaderboard data from the API
-  const fetchLeaderboard = async () => {
+  // Function to fetch leaderboard data from the API. Filters the data by categoryid
+  const fetchLeaderboard = async (categoryId = 0) => {
     try {
-      const response = await fetch('https://quizzleapp.lm.r.appspot.com/leaderboard');
+      setLoading(true); // Start loading
+      let url = 'https://quizzleapp.lm.r.appspot.com/leaderboard';
+      
+      // Append the category ID to the URL if it's not 'All' (id 0)
+      if (categoryId !== 0) {
+        url += `?category=${categoryId}`;
+        console.log (url);
+      }
+
+      const response = await fetch(url);
       const data = await response.json();
       setLeaderboard(data);
-      setLoading(false); // Stop loading when data is fetched
+      
     } catch (error) {
       setError(error);
-      setLoading(false); // Stop loading on error
       Alert.alert('Error', 'Failed to fetch leaderboard data.');
+    } finally {
+      setLoading(false); // Stop loading when data is fetched or an error occurs
     }
   };
 
-  // useEffect to call the fetch function when the component mounts
+  // Fetch leaderboard when component mounts or when category changes
   useEffect(() => {
-    fetchLeaderboard();
-  }, []);
+    fetchLeaderboard(selectedCategoryId);
+  }, [selectedCategoryId]); // Trigger fetch when category changes
 
   // Key handler for FlatList
   const keyHandler = (item, index) => {

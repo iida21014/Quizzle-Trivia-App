@@ -100,17 +100,21 @@ app.get('/items', async (req, res) => {
   }
 });
 
-// GET TOP 10
+// GET TOP 10 with category filter
 app.get('/leaderboard', async (req, res) => {
   try {
+    const { category } = req.query; // Get category from query string
+    const query = category ? { category: parseInt(category) } : {}; // Filter by category if provided
+
     const leaderboard = await itemsCollection
-      .find()
+      .find(query)
       .sort({ score: -1 }) // Sort by points descending
       .limit(10)            // Limit to top 10
       .toArray();
-    res.json(leaderboard); // Send the top 10 sorted entries to the frontend
+
+    res.json(leaderboard); // Send the filtered top 10 sorted entries to the frontend
   } catch (err) {
-    res.status(500).send('Error fetching items');
+    res.status(500).send('Error fetching leaderboard');
   }
 });
 
