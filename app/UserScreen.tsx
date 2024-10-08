@@ -10,7 +10,7 @@ const UserScreen = ({ navigation }: any) => {
       // Fetch the JWT token stored in AsyncStorage or SecureStore
       const token = await AsyncStorage.getItem('token');
 
-      const response = await fetch('http://192.168.101.100:3000/protected', {
+      const response = await fetch('https://quizzleapp.lm.r.appspot.com/protected', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
