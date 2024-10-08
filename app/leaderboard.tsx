@@ -2,13 +2,27 @@ import {useState, useEffect} from 'react';
 import styles from './styles'; 
 import { View, Text, FlatList, ActivityIndicator, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 
 export default function LeaderboardScreen() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true); // For loading state
   const [error, setError] = useState(null);     // For error handling
   const [selectedCategoryId, setSelectedCategoryId] = useState(0); // State for category
+  const [index, setIndex] = useState(0);
+  const [routes] = useState([
+    { key: 'allUsers', title: 'All' },
+    { key: 'currentUser', title: 'You' },
+  ]);
 
+  const [chosenView, setChosenView] = useState({
+    allUsers: [],
+    currentUser: [],
+  });
+  const [loadingView, setLoadingView] = useState({
+    allUsers: true,
+    currentUser: true
+  });
 
   const categories = [
     { id: 0, name: 'All' },
@@ -32,11 +46,10 @@ export default function LeaderboardScreen() {
       setLoading(true); // Start loading
       let url = 'https://quizzleapp.lm.r.appspot.com/leaderboard';
       
-      // Append the category ID to the URL if it's not 'All' (id 0)
-      if (categoryId !== 0) {
-        url += `?category=${categoryId}`;
-        console.log (url);
-      }
+      // Append the category ID to the URL
+      url += `?category=${categoryId}`;
+      console.log (url);
+      
 
       const response = await fetch(url);
       const data = await response.json();
