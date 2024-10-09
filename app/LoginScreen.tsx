@@ -16,7 +16,8 @@ const LoginScreen = () => {
       // Log the username and password before sending the request
       console.log('Attempting to log in with:', { username, password });
   
-      const response = await fetch('https://quizzleapp.lm.r.appspot.com/login', {
+      //vaihda tää sit ku app on gcloudissa const response = await fetch('https://quizzleapp.lm.r.appspot.com/login', {
+        const response = await fetch('http://localhost:3000/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -64,7 +65,6 @@ const LoginScreen = () => {
         placeholder="Username"
         value={username}
         onChangeText={setUsername}
-        autoCapitalize="none" // Prevent auto-capitalizing username
         autoCorrect={false} // Disable autocorrect for username input
       />
       <TextInput
@@ -73,6 +73,7 @@ const LoginScreen = () => {
         secureTextEntry
         value={password}
         onChangeText={setPassword}
+        autoCapitalize="none" // Prevent auto-capitalizing password
       />
       
       {/* Show loading indicator if login is in progress */}

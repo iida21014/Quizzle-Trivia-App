@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');  // Import cors
 const { MongoClient, ObjectId } = require('mongodb');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();  // Load environment variables from .env file
 
 const app = express();  // Create an instance of Express
@@ -28,8 +30,6 @@ client.connect()
     process.exit(1);  // Exit the process if connection fails
   });
 
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
 
 // Middleware to verify JWT token
@@ -37,11 +37,13 @@ const authenticateToken = (req, res, next) => {
   const token = req.headers['authorization']?.split(' ')[1];
 
   if (!token) {
+    console.error('No token provided');
     return res.status(401).json({ error: 'No token provided' });
   }
 
-  jwt.verify(token, JWT_SECRET, async (err, decoded) => {
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
     if (err) {
+      console.error('Token verification failed:', err);
       return res.status(403).json({ error: 'Invalid token' });
     }
 
@@ -108,29 +110,30 @@ app.post('/login', async (req, res) => {
   }
 });
 
+// Protected endpoint to fetch user info
 app.get('/protected', authenticateToken, async (req, res) => {
+  console.log('Received request at /protected:', {
+    headers: req.headers,
+    user: req.user
+  });
+
   try {
-    // Extract the userId from the decoded JWT
-    const userId = req.user.userId; // userId should be a string
+    const userId = req.user.userId;
+    console.log('User ID:', userId);
 
-    // Log the user ID for debugging purposes
-    console.log('User ID:', userId);  // Log the User ID to check its value
-
-    // Attempt to find the user in the database using the userId
     const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
     
     if (!user) {
+      console.error('User not found with ID:', userId);
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Respond with the user information
     res.json({ user: { username: user.username } });
   } catch (err) {
     console.error('Error fetching user:', err);
     res.status(500).json({ error: 'Failed to fetch user' });
   }
 });
-
 
 
 // GET all items
@@ -187,4 +190,3 @@ app.delete('/items/:id', async (req, res) => {
     res.status(500).send('Error deleting item');
   }
 });
-
