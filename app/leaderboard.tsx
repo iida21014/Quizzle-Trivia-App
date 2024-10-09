@@ -92,27 +92,42 @@ export default function LeaderboardScreen() {
     );
   }
 
-  // Render the leaderboard
-  return (
-    <View style={styles.container}>
-      <View style={styles.contentContainerFull}>
+ // Create a component to render the leaderboard and picker view
+ const renderLeaderboardView = () => (
+  <View style={styles.container}>
+    <View style={styles.contentContainerFull}>
       <Text style={styles.title}>TOP 10 scores</Text>
-        {/* Picker to choose the category of the leaderboard */}
-        <Text>From the category:</Text>
-        <Picker
-          selectedValue={selectedCategoryId}
-          onValueChange={(itemValue) => setSelectedCategoryId(itemValue)}
-        >          
-          {categories.map(({ id, name }) => (<Picker.Item key={id} label={name} value={id} />  ))}
-        </Picker>
-        
-        
-         <FlatList style={styles.leaderboardStyle}
-          keyExtractor={keyHandler}
-          data={leaderboard}
-          renderItem={renderLeaderboard}
-        />
-      </View>
+      {/* Picker to choose the category of the leaderboard */}
+      <Text>From the category:</Text>
+      <Picker
+        selectedValue={selectedCategoryId}
+        onValueChange={(itemValue) => setSelectedCategoryId(itemValue)}
+      >          
+        {categories.map(({ id, name }) => (<Picker.Item key={id} label={name} value={id} />  ))}
+      </Picker>
+      
+      <FlatList style={styles.leaderboardStyle}
+        keyExtractor={keyHandler}
+        data={leaderboard}
+        renderItem={renderLeaderboard}
+      />
     </View>
-  );
+  </View>
+);
+
+// Define scenes for each tab
+const renderScene = SceneMap({
+  allUsers: renderLeaderboardView,   // Same view for both tabs for now
+  currentUser: renderLeaderboardView, // You can customize this view later for the current user
+});
+
+return (
+  <TabView
+    navigationState={{ index, routes }}
+    renderScene={renderScene}
+    onIndexChange={setIndex}
+    initialLayout={{ width: '100%' }}
+    renderTabBar={props => <TabBar {...props} />}
+  />
+);
 };
