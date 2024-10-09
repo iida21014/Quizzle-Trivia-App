@@ -26,7 +26,7 @@ const numberOfQuestions = 10;
 
 export default function CreateQuiz() {
   // State for difficulty
-  const [selectedDifficulty, setSelectedDifficulty] = useState('all');
+  const [selectedDifficulty, setSelectedDifficulty] = useState('medium');
   // State for number of questions
   const [selectedCategoryId, setSelectedCategoryId] = useState(0);
 
@@ -43,7 +43,6 @@ export default function CreateQuiz() {
             onValueChange={(itemValue) =>
               setSelectedDifficulty(itemValue)
         }>
-            <Picker.Item label="All" value="all" />
             <Picker.Item label="Easy" value="easy" />
             <Picker.Item label="Medium" value="medium" />
             <Picker.Item label="Hard" value="hard" />
