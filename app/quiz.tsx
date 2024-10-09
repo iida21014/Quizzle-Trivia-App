@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { View, Text } from 'react-native';
 import { decode } from 'he';
 import styles from './styles';
@@ -43,6 +43,7 @@ function getInitialAnswerTimeInSeconds() {
 export default function Quiz() {
   const { difficulty, numberOfQuestions, categoryId } = useLocalSearchParams();
   const context = useContext(TokenContext);
+  const router = useRouter();
 
   // Assert that context is not null
   if (!context) {
@@ -61,16 +62,22 @@ export default function Quiz() {
   const [showResult, setShowResult] = useState(false); // State to show result of answer
   const [showTimeout, setShowTimeout] = useState(false); // State to show the timeout message
 
-  console.log('Accessing token from context:', token);
-
   // Waits for 2 seconds and then clears UI and shows the next question
   function moveOnToNextQuestion() {
     setTimeout(() => {
       if (questionIndex < questions.length - 1) {
         setQuestionIndex((prevIndex) => prevIndex + 1);
       } else {
-        console.log('Quiz Finished!');
-        console.log('Player points ', playerPoints);
+
+        // Navigating to result page and passing category and points as parameters
+        router.replace({
+          pathname: '/quizResult',
+          params: {
+            totalPoints: playerPoints,
+            categoryId,
+          }
+        })
+        return;
       }
 
       // Initializing the state for the next question

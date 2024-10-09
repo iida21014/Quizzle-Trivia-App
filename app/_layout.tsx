@@ -40,6 +40,7 @@ export default function RootLayout() {
 
         {/* Other Screens */}
         <Stack.Screen options={{ title: 'Create a Quiz' }} name="createQuiz" />
+        <Stack.Screen options={{ title: 'Quiz result' }} name="quizResult" />
         <Stack.Screen options={{ title: 'Quiz' }} name="quiz" />
         <Stack.Screen options={{ title: 'Leaderboard' }} name="leaderboard" />
         
