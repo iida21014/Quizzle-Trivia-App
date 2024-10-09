@@ -14,7 +14,7 @@ function shuffleArray(array) {
   return array;
 }
 
-const maximumTimeToAnswerInMilliseconds = 15000;
+const maximumTimeToAnswerInMilliseconds = 20000;
 
 const maxPointsForAnswer = {
   easy: 700,
@@ -36,6 +36,10 @@ function calculatePoints(answerTimeInMilliSeconds, questionDifficulty) {
   return Math.round(maxPoints * answerTimeCoefficient); // Rounding the result to integers
 }
 
+function getInitialAnswerTimeInSeconds() {
+  return Math.round(maximumTimeToAnswerInMilliseconds / 1000);
+}
+
 export default function Quiz() {
   const { difficulty, numberOfQuestions, categoryId } = useLocalSearchParams();
   const context = useContext(TokenContext);
@@ -47,6 +51,7 @@ export default function Quiz() {
 
   const { token, regenerateToken } = context;
 
+  const [secondsLeft, setSecondsLeft] = useState(getInitialAnswerTimeInSeconds());
   const [playerPoints, setPlayerPoints] = useState(0); // State to have the points player has got
   const [answerPoints, setAnswerPoints] = useState(0); // State to have the points had from the current question
   const [questionAskedAt, setQuestionAskedAt] = useState(new Date());
@@ -68,7 +73,8 @@ export default function Quiz() {
         console.log('Player points ', playerPoints);
       }
 
-      // Clear the selected answer and result display
+      // Initializing the state for the next question
+      setSecondsLeft(getInitialAnswerTimeInSeconds());
       setAlternative(null);
       setShowResult(false);
       setShowTimeout(false);
@@ -140,6 +146,12 @@ export default function Quiz() {
 
       // Do nothing if there is still time to pick an answer
       if (timeElapsedInMilliseconds <= maximumTimeToAnswerInMilliseconds) {
+
+        // Calculating time left and updating it to UI if needed
+        const timeLeftInSeconds = Math.round((maximumTimeToAnswerInMilliseconds - timeElapsedInMilliseconds) / 1000);
+        if (timeLeftInSeconds !== secondsLeft) {          
+          setSecondsLeft(timeLeftInSeconds)
+        }
         return;
       }
 
@@ -150,7 +162,7 @@ export default function Quiz() {
 
       // After timeout there is no need to run this code anymore.
       clearInterval(interval);
-    }, 200);
+    }, 100);
 
     // Returning cleanup function for effect which clears the interval
     return () => clearInterval(interval);
@@ -198,6 +210,7 @@ export default function Quiz() {
                 onPickAlternative={pickAnswer} // Pass the pickAnswer function
                 numberOfQuestions={questions.length}
               />
+              <Text>Time left: {secondsLeft}</Text>
               {showResult && (
                 <View>
                   <Text style={styles.resultText}>
