@@ -17,7 +17,7 @@ const LoginScreen = () => {
       console.log('Attempting to log in with:', { username, password });
   
       //vaihda tää sit ku app on gcloudissa const response = await fetch('https://quizzleapp.lm.r.appspot.com/login', {
-        const response = await fetch('http://localhost:3000/login', {
+        const response = await fetch('http://192.168.101.100:3000/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

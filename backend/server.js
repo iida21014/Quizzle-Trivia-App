@@ -1,33 +1,32 @@
 const express = require('express');
-const cors = require('cors');  // Import cors
 const { MongoClient, ObjectId } = require('mongodb');
+const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();  // Load environment variables from .env file
 
-const app = express();  // Create an instance of Express
-app.use(cors());  // Enable CORS for all routes
+const app = express();
+app.use(cors());
 app.use(express.json());
 
-const uri = process.env.MONGODB_URI;
+const uri = process.env.MONGODB_URI; // Ensure your existing MongoDB URI points to your database
 const client = new MongoClient(uri);
 
 let db, itemsCollection, usersCollection;
 
 client.connect()
   .then(() => {
-    db = client.db("Quizzle");
+    db = client.db("Quizzle"); // Connect to your existing database
     itemsCollection = db.collection("Leaderboard");
     usersCollection = db.collection("Users");
     console.log('Connected to MongoDB');
 
-    // Start the server after successful connection
     const port = process.env.PORT || 3000;
     app.listen(port, () => console.log(`Server running on port ${port}`));
   })
   .catch(err => {
     console.error('Failed to connect to MongoDB', err);
-    process.exit(1);  // Exit the process if connection fails
+    process.exit(1);
   });
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
@@ -52,7 +51,6 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-
 // Register user
 app.post('/register', async (req, res) => {
   const { username, password } = req.body;
@@ -60,7 +58,7 @@ app.post('/register', async (req, res) => {
   try {
     const existingUser = await usersCollection.findOne({ username });
     if (existingUser) {
-      console.error('User already exists'); // Log error
+      console.error('User already exists');
       return res.status(400).json({ error: 'User already exists' });
     }
 
@@ -80,29 +78,19 @@ app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
   try {
-    // Find the user in the database
     const user = await usersCollection.findOne({ username });
-    
-    // Log the found user or null if not found
-    console.log('Found user:', user);
-    
+
     if (!user) {
       return res.status(400).json({ error: 'Invalid credentials' });
     }
 
-    // Compare the provided password with the stored hashed password
     const isMatch = await bcrypt.compare(password, user.password);
-    
-    // Log the password match result
-    console.log('Password match:', isMatch);
     
     if (!isMatch) {
       return res.status(400).json({ error: 'Invalid credentials' });
     }
 
-    // Generate a JWT token
     const token = jwt.sign({ userId: user._id, username: user.username }, JWT_SECRET, { expiresIn: '12h' });
-
     res.json({ token });
   } catch (err) {
     console.error('Error logging in user:', err);
@@ -112,19 +100,12 @@ app.post('/login', async (req, res) => {
 
 // Protected endpoint to fetch user info
 app.get('/protected', authenticateToken, async (req, res) => {
-  console.log('Received request at /protected:', {
-    headers: req.headers,
-    user: req.user
-  });
-
   try {
     const userId = req.user.userId;
-    console.log('User ID:', userId);
 
     const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
-    
+
     if (!user) {
-      console.error('User not found with ID:', userId);
       return res.status(404).json({ error: 'User not found' });
     }
 
@@ -132,6 +113,68 @@ app.get('/protected', authenticateToken, async (req, res) => {
   } catch (err) {
     console.error('Error fetching user:', err);
     res.status(500).json({ error: 'Failed to fetch user' });
+  }
+});
+
+// PUT update username
+app.put('/update-username', authenticateToken, async (req, res) => {
+  const { username } = req.body;
+
+  // Validate the new username
+  if (!username || username.length < 3) {
+    return res.status(400).json({ error: 'Username must be at least 3 characters long.' });
+  }
+
+  try {
+    const userId = req.user.userId; // Use userId from the JWT
+
+    console.log('Attempting to update username for userId:', userId);
+
+    // Check if the new username already exists in the database
+    const existingUser = await usersCollection.findOne({ username });
+    if (existingUser) {
+      return res.status(400).json({ error: 'Username already exists.' });
+    }
+
+    // Update the username in the database
+    const result = await usersCollection.updateOne(
+      { _id: new ObjectId(userId) },  // Find user by ID
+      { $set: { username } }          // Set the new username
+    );
+
+    // Log the result of the update operation
+    console.log('Update result:', result);
+
+    // Check if the user was updated
+    if (result.modifiedCount === 0) {
+      return res.status(404).json({ error: 'User not found or username was not updated.' });
+    }
+
+    // Return a success message and the updated username
+    return res.json({ message: 'Username updated successfully', user: { username } });
+
+  } catch (error) {
+    console.error('Error updating username:', error);
+    return res.status(500).send('Error updating username');
+  }
+});
+
+// DELETE user account
+app.delete('/delete-user', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId; // Get user ID from the token
+
+    // Find and delete the user from the collection
+    const result = await usersCollection.deleteOne({ _id: new ObjectId(userId) });
+
+    if (result.deletedCount === 1) {
+      res.status(200).json({ message: 'User account deleted successfully' });
+    } else {
+      res.status(404).json({ error: 'User not found' });
+    }
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -149,16 +192,16 @@ app.get('/items', async (req, res) => {
 // GET TOP 10 with category filter
 app.get('/leaderboard', async (req, res) => {
   try {
-    const { category } = req.query; // Get category from query string
-    const query = category ? { category: parseInt(category) } : {}; // Filter by category if provided
+    const { category } = req.query;
+    const query = category ? { category: parseInt(category) } : {};
 
     const leaderboard = await itemsCollection
       .find(query)
-      .sort({ score: -1 }) // Sort by points descending
-      .limit(10)            // Limit to top 10
+      .sort({ score: -1 })
+      .limit(10)
       .toArray();
 
-    res.json(leaderboard); // Send the filtered top 10 sorted entries to the frontend
+    res.json(leaderboard);
   } catch (err) {
     res.status(500).send('Error fetching leaderboard');
   }

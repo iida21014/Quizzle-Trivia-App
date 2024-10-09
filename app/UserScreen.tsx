@@ -1,104 +1,135 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, Alert, StyleSheet, ActivityIndicator } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native';
-import { UserScreenNavigationProp } from './navigationTypes';
-
-// Define the type for user info
-type UserInfo = {
-  username: string;
-};
+import { View, Text, Button, Alert, StyleSheet } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // For storing JWT securely
+import { useNavigation } from '@react-navigation/native'; // For navigation after logout
+import { UserScreenNavigationProp } from './navigationTypes'; // Import the navigation prop type
 
 const UserScreen = () => {
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null); // State for user info
-  const [loading, setLoading] = useState(true); // State for loading
-  const navigation = useNavigation<UserScreenNavigationProp>();
+  const [username, setUsername] = useState('');
+  const navigation = useNavigation<UserScreenNavigationProp>(); // Use the imported type for navigation
 
-  // Function to fetch user info
-  const fetchUserInfo = async () => {
-    try {
-      const token = await AsyncStorage.getItem('token');
+  // Fetch user data when the component mounts
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token'); // Retrieve token
 
-      // vaihda tää sit ku app on gcloudissa const response = await fetch(''https://quizzleapp.lm.r.appspot.com/protected', {
-      const response = await fetch('http://localhost:3000/protected', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+        if (!token) {
+          Alert.alert('Error', 'No token found');
+          return;
+        }
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log('User info:', data); // Log user info for debugging
-        setUserInfo(data.user); // Update state with user info
-      } else {
-        const errorText = await response.text();
-        console.error('Error fetching user info:', errorText); // Log error response
-        Alert.alert('Error fetching user info', errorText);
+      //vaihda tää sit ku app on gcloudissa const response = await fetch('https://quizzleapp.lm.r.appspot.com/protected', {
+        const response = await fetch('http://192.168.101.100:3000/protected', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`, // Pass the token for authentication
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setUsername(data.user.username); // Set the username
+        } else {
+          Alert.alert('Error', 'Failed to fetch user data');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        Alert.alert('Error', 'An error occurred while fetching user data');
       }
+    };
+
+    fetchUserData();
+  }, []);
+
+  // Function to handle user deletion
+  const deleteUser = async () => {
+    Alert.alert(
+      'Delete Account',
+      'Are you sure you want to delete your account? This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem('token');
+
+              if (!token) {
+                Alert.alert('Error', 'No token found');
+                return;
+              }
+    
+              //vaihda tää sit ku app on gcloudissa const response = await fetch('https://quizzleapp.lm.r.appspot.com/delete-user', {
+              const response = await fetch('http://192.168.101.100:3000/delete-user', {
+                method: 'DELETE',
+                headers: {
+                  'Authorization': `Bearer ${token}`, // Send the token for authentication
+                },
+              });
+
+              const data = await response.json();
+
+              if (response.ok) {
+                // Show success alert and log out the user
+                Alert.alert('Success', 'Your account has been deleted.');
+
+                // Remove the JWT token from AsyncStorage
+                await AsyncStorage.removeItem('token');
+
+                // Navigate back to the login screen after deletion
+                navigation.navigate('LoginScreen'); // Navigate to the login screen
+              } else {
+                Alert.alert('Error', data.error || 'Failed to delete account');
+              }
+            } catch (error) {
+              console.error('Error deleting user:', error);
+              Alert.alert('Error', 'An error occurred while deleting your account');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  // Function to handle logout
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('token'); // Remove the JWT token
+      navigation.navigate('LoginScreen'); // Navigate to the login screen
     } catch (error) {
-      console.error('Error in fetchUserInfo:', error);
-      Alert.alert('Error', 'Failed to fetch user info.');
-    } finally {
-      setLoading(false); // Set loading to false after fetching
+      console.error('Error logging out:', error);
+      Alert.alert('Error', 'Failed to log out');
     }
   };
 
-  useEffect(() => {
-    fetchUserInfo(); // Fetch user info when the component mounts
-  }, []);
-
-  // Handle logout
-  const handleLogout = async () => {
-    await AsyncStorage.removeItem('token'); // Clear the token on logout
-    setUserInfo(null); // Reset userInfo state to null
-    navigation.navigate('LoginScreen'); // Navigate back to login screen
-  };
-
-  // Show loading indicator while fetching user info
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text>Loading user info...</Text>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>User Info</Text>
-      {userInfo ? (
-        <View>
-          <Text>Username: {userInfo.username}</Text> {/* Display username */}
-        </View>
-      ) : (
-        <View>
-          <Text>No user info available.</Text>
-        </View>
-      )}
-      <Button title="Logout" onPress={handleLogout} /> {/* Logout button */}
+      <Text style={styles.welcomeText}>Welcome, {username}!</Text>
+      <Button title="Logout" onPress={handleLogout} color="blue" />
+
+      <View style={styles.deleteButtonContainer}>
+        <Button title="Delete Account" color="red" onPress={deleteUser} />
+      </View>
     </View>
   );
 };
 
+// Styling for the UserScreen
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
     padding: 20,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+  welcomeText: {
+    fontSize: 20,
     marginBottom: 20,
-    textAlign: 'center',
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  deleteButtonContainer: {
+    marginTop: 20,
   },
 });
 
