@@ -1,13 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, Button, Alert, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
+import { UserScreenNavigationProp } from './navigationTypes';
 
-const UserScreen = ({ navigation }: any) => {
-  const [userInfo, setUserInfo] = useState<any>(null);
+// Define the type for user info
+type UserInfo = {
+  username: string;
+  // Add other properties of user info if available, e.g., email, id, etc.
+};
+
+const UserScreen = () => {
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);  // Set the state type to UserInfo or null
+  const navigation = useNavigation<UserScreenNavigationProp>();
 
   const fetchUserInfo = async () => {
     try {
-      // Fetch the JWT token stored in AsyncStorage or SecureStore
       const token = await AsyncStorage.getItem('token');
 
       const response = await fetch('https://quizzleapp.lm.r.appspot.com/protected', {
@@ -18,7 +26,7 @@ const UserScreen = ({ navigation }: any) => {
 
       if (response.ok) {
         const data = await response.json();
-        setUserInfo(data.user); // Assuming the server sends back user info
+        setUserInfo(data.user); // Assuming data.user contains { username: string }
       } else {
         Alert.alert('Error', 'Failed to fetch user info');
       }
@@ -32,8 +40,8 @@ const UserScreen = ({ navigation }: any) => {
   }, []);
 
   const handleLogout = () => {
-    // Clear the token from AsyncStorage or SecureStore and navigate back to LoginScreen
-    navigation.navigate('LoginScreen');
+    AsyncStorage.removeItem('token');  // Clear the token on logout
+    navigation.navigate('LoginScreen');  // Navigate back to login screen
   };
 
   return (
@@ -41,8 +49,7 @@ const UserScreen = ({ navigation }: any) => {
       <Text style={styles.title}>User Info</Text>
       {userInfo ? (
         <View>
-          <Text>Username: {userInfo.username}</Text>
-          {/* Add more user-specific info here */}
+          <Text>Username: {userInfo.username}</Text> {/* No more TypeScript error here */}
         </View>
       ) : (
         <Text>Loading user info...</Text>

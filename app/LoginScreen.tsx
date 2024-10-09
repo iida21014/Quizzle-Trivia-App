@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, Alert, StyleSheet, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { LoginScreenNavigationProp } from './navigationTypes';
@@ -14,7 +14,7 @@ const LoginScreen = () => {
     setLoading(true);
     try {
       // Log the username and password before sending the request
-      console.log('Logging in with:', { username, password });
+      console.log('Attempting to log in with:', { username, password });
   
       const response = await fetch('https://quizzleapp.lm.r.appspot.com/login', {
         method: 'POST',
@@ -23,11 +23,14 @@ const LoginScreen = () => {
         },
         body: JSON.stringify({ username, password }),
       });
-  
+
+      // Log the response status code and data for debugging purposes
+      console.log('Response status:', response.status);
       const data = await response.json();
-  
+      console.log('Response data:', data);
+
       if (response.ok) {
-        await AsyncStorage.setItem('token', data.token); // Store the token
+        await AsyncStorage.setItem('token', data.token); // Store the token securely
         Alert.alert(
           'Success',
           'Login successful',
@@ -40,19 +43,18 @@ const LoginScreen = () => {
               },
             },
           ],
-          { cancelable: false } // Prevents the alert from being dismissed by tapping outside
+          { cancelable: false }
         );
       } else {
         Alert.alert('Login failed', data.error || 'Invalid credentials');
       }
     } catch (error) {
-      console.error('Error during login', error);
-      Alert.alert('Error', 'Something went wrong.');
+      console.error('Error during login:', error);
+      Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
   };
-  
 
   return (
     <View style={styles.container}>
@@ -62,6 +64,8 @@ const LoginScreen = () => {
         placeholder="Username"
         value={username}
         onChangeText={setUsername}
+        autoCapitalize="none" // Prevent auto-capitalizing username
+        autoCorrect={false} // Disable autocorrect for username input
       />
       <TextInput
         style={styles.input}
@@ -70,11 +74,17 @@ const LoginScreen = () => {
         value={password}
         onChangeText={setPassword}
       />
-      <Button
-        title={loading ? 'Logging in...' : 'Login'}
-        onPress={handleLogin}
-        disabled={loading}
-      />
+      
+      {/* Show loading indicator if login is in progress */}
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <Button
+          title="Login"
+          onPress={handleLogin}
+          disabled={!username || !password || loading} // Disable login if fields are empty or loading
+        />
+      )}
     </View>
   );
 };
@@ -96,6 +106,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginVertical: 10,
     borderRadius: 5,
+    borderColor: '#ccc',
   },
 });
 

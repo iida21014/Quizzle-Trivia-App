@@ -15,6 +15,7 @@ export type RootStackParamList = {
 // Navigation Prop
 export type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'LoginScreen'>;
 export type RegisterScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'RegisterScreen'>;
+export type UserScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'UserScreen'>;
 
 // Route Prop (if needed)
 export type LoginScreenRouteProp = RouteProp<RootStackParamList, 'LoginScreen'>;

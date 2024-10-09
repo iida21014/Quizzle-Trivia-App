@@ -32,6 +32,25 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
 
+// Middleware to verify JWT token
+const authenticateToken = (req, res, next) => {
+  const token = req.headers['authorization']?.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+
+  jwt.verify(token, JWT_SECRET, async (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ error: 'Invalid token' });
+    }
+
+    req.user = decoded; // Store user info in request object
+    next();
+  });
+};
+
+
 // Register user
 app.post('/register', async (req, res) => {
   const { username, password } = req.body;
@@ -80,7 +99,7 @@ app.post('/login', async (req, res) => {
     }
 
     // Generate a JWT token
-    const token = jwt.sign({ userId: user._id, username: user.username }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ userId: user._id, username: user.username }, JWT_SECRET, { expiresIn: '12h' });
 
     res.json({ token });
   } catch (err) {
@@ -88,6 +107,30 @@ app.post('/login', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+app.get('/protected', authenticateToken, async (req, res) => {
+  try {
+    // Extract the userId from the decoded JWT
+    const userId = req.user.userId; // userId should be a string
+
+    // Log the user ID for debugging purposes
+    console.log('User ID:', userId);  // Log the User ID to check its value
+
+    // Attempt to find the user in the database using the userId
+    const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Respond with the user information
+    res.json({ user: { username: user.username } });
+  } catch (err) {
+    console.error('Error fetching user:', err);
+    res.status(500).json({ error: 'Failed to fetch user' });
+  }
+});
+
 
 
 // GET all items
@@ -144,3 +187,4 @@ app.delete('/items/:id', async (req, res) => {
     res.status(500).send('Error deleting item');
   }
 });
+
