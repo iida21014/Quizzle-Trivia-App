@@ -20,8 +20,8 @@ export default function QuizResult() {
           'Content-Type': 'application/json', // Added this so that backend knows it's receiving json
         },
         body: JSON.stringify({
-          score,
           username: 'someUser',
+          score,
           category,
         }),
       });
