@@ -8,55 +8,69 @@ export default function QuizResult() {
   const { totalPoints, categoryId } = useLocalSearchParams();
   
   // State for showing leaderboard position and pesronal record
-  const { leaderboardPosition, setLeaderboardPosition } = useState(null);
-  const { isPersonalRecord, setIsPersonalRecord } = useState(false)
+  // const { leaderboardPosition, setLeaderboardPosition } = useState(null);
+  // const { isPersonalRecord, setIsPersonalRecord } = useState(false)
   
   // Sends user points to backend and sets leaderboard results to the UI
   async function postPlayerPoints(score, category) {
-    // TODO: Backend implementation not ready
-    // try {
-    //   const response = await fetch('https://quizzleapp.lm.r.appspot.com/items', { method: 'POST', body: JSON.stringify({
-    //     score,
-    //     username: 'someUser',
-    //     category,
-    //   })});
-    //   const { leaderboardPosition: position, isPersonalRecord: isRecord } = await response.json();
-
-    //   setLeaderboardPosition(position);
-    //   setIsPersonalRecord(isRecord);
-    // } catch (error) {
-    //   console.error('Could not save leaderboard points', error);
-    // }
+    try {
+      const response = await fetch('https://quizzleapp.lm.r.appspot.com/items', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json', // Added this so that backend knows it's receiving json
+        },
+        body: JSON.stringify({
+          score,
+          username: 'someUser',
+          category,
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      // Process the response here if needed, e.g. setting leaderboard data
+      console.log('Response data:', data);
+      // setLeaderboardPosition(data.leaderboardPosition);
+      // setIsPersonalRecord(data.isPersonalRecord);
+    } catch (error) {
+      console.error('Could not save leaderboard points', error);
+    }
   }
 
-  // Returns UI element which shows leaderboard-related information
-  function renderLeaderboardPosition() {
-    // Leaderboard position not fetched from the backend, returning nothing
-    if (leaderboardPosition == null) {
-      return null;
-    }
+  // // Returns UI element which shows leaderboard-related information
+  // function renderLeaderboardPosition() {
+  //   // Leaderboard position not fetched from the backend, returning nothing
+  //   if (leaderboardPosition == null) {
+  //     return null;
+  //   }
 
-    // Score didn't reacth the leaderboard
-    if (leaderboardPosition === -1) {
-      return <Text>Sorry, you couldn't reach the leaderboard</Text>
-    }
+  //   // Score didn't reacth the leaderboard
+  //   if (leaderboardPosition === -1) {
+  //     return <Text>Sorry, you couldn't reach the leaderboard</Text>
+  //   }
 
-    return <Text>Congratulations! You reached leaderboard position {leaderboardPosition}</Text>
-  }
+  //   return <Text>Congratulations! You reached leaderboard position {leaderboardPosition}</Text>
+  // }
 
-  // Returns a UI element for notifying about personal record
-  function renderPersonalRecord() {
-    if (!isPersonalRecord) {
-      return null;
-    }
+  // // Returns a UI element for notifying about personal record
+  // function renderPersonalRecord() {
+  //   if (!isPersonalRecord) {
+  //     return null;
+  //   }
 
-    return <Text>It's a new personal record!</Text>
-  }
+  //   return <Text>It's a new personal record!</Text>
+  // }
 
   // When view initializes, sending game results to backend
   useEffect(() => {
-    postPlayerPoints(totalPoints, categoryId);
-  }, []);
+    console.log('totalPoints:', totalPoints, 'categoryId:', categoryId); // This is for debugging
+    if (totalPoints && categoryId) {
+      postPlayerPoints(totalPoints, categoryId);
+    }
+  }, [totalPoints, categoryId]);
   
   return (
     <View style={styles.container}>
@@ -64,8 +78,8 @@ export default function QuizResult() {
         <Text style={styles.title}>Game ended</Text>
         
         <Text>You got {totalPoints} points!</Text>
-        {renderLeaderboardPosition()}
-        {renderPersonalRecord()}
+        {/* {renderLeaderboardPosition()}
+        {renderPersonalRecord()} */}
 
         {/* A button for playing a new game */}
         <View style={styles.startButtonContainer}>
