@@ -189,11 +189,19 @@ app.get('/items', async (req, res) => {
   }
 });
 
-// GET TOP 10 with category filter
+// GET TOP 10 with category & username filter
 app.get('/leaderboard', async (req, res) => {
   try {
-    const { category } = req.query;
-    const query = category ? { category: parseInt(category) } : {};
+    const { category, username } = req.query;
+    const query = {};
+
+    if (category) {
+      query.category = parseInt(category);
+    }
+
+    if (username) {
+      query.username = username;
+    }
 
     const leaderboard = await itemsCollection
       .find(query)

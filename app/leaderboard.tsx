@@ -1,10 +1,10 @@
-import {useState, useEffect} from 'react';
-import styles from './styles'; 
+import { useState, useEffect } from 'react';
+import styles from './styles';
 import { View, Text, FlatList, ActivityIndicator, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 
-export default function LeaderboardScreen() {
+const LeaderboardScreen = () => {  
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true); // For loading state
   const [error, setError] = useState(null);     // For error handling
@@ -15,15 +15,18 @@ export default function LeaderboardScreen() {
     { key: 'currentUser', title: 'You' },
   ]);
 
-  const [chosenView, setChosenView] = useState({
+  const [leaderboardsView, setLeaderboardsView] = useState({
     allUsers: [],
     currentUser: [],
   });
+  
   const [loadingView, setLoadingView] = useState({
     allUsers: true,
-    currentUser: true
+    currentUser: true,
   });
 
+  const username = 'Iida';
+  
   const categories = [
     { id: 0, name: 'All' },
     { id: 10, name: 'Books' },
@@ -38,96 +41,130 @@ export default function LeaderboardScreen() {
     { id: 23, name: 'History' },
   ];
 
-  
-
-  // Function to fetch leaderboard data from the API. Filters the data by categoryid
-  const fetchLeaderboard = async (categoryId = 0) => {
+  // Function to fetch leaderboard data from the API with optional username filtering
+  const fetchLeaderboard = async (categoryId = 0, user = '') => {
     try {
-      setLoading(true); // Start loading
-      let url = 'https://quizzleapp.lm.r.appspot.com/leaderboard';
-      
-      // Append the category ID to the URL
-      url += `?category=${categoryId}`;
-      console.log (url);
-      
+      let url = `https://quizzleapp.lm.r.appspot.com/leaderboard?category=${categoryId}`;
+
+      if (user) {
+        url += `&username=${encodeURIComponent(user)}`;
+      }
 
       const response = await fetch(url);
       const data = await response.json();
-      setLeaderboard(data);
-      
+      return data;  // Return the data for individual view
     } catch (error) {
       setError(error);
       Alert.alert('Error', 'Failed to fetch leaderboard data.');
-    } finally {
-      setLoading(false); // Stop loading when data is fetched or an error occurs
+      return [];
     }
   };
 
-  // Fetch leaderboard when component mounts or when category changes
+  // Fetch data for both 'allUsers' and 'currentUser' tab when category changes
   useEffect(() => {
-    fetchLeaderboard(selectedCategoryId);
-  }, [selectedCategoryId]); // Trigger fetch when category changes
+    const fetchData = async () => {
+      // Fetch data for 'allUsers'
+      setLoadingView(prev => ({ ...prev, allUsers: true }));
+      const allUsersData = await fetchLeaderboard(selectedCategoryId);
+      setLeaderboardsView(prev => ({ ...prev, allUsers: allUsersData }));
+      setLoadingView(prev => ({ ...prev, allUsers: false }));
+
+      // Fetch data for 'currentUser' if username is provided
+      if (username) {
+        setLoadingView(prev => ({ ...prev, currentUser: true }));
+        const currentUserData = await fetchLeaderboard(selectedCategoryId, username);
+        setLeaderboardsView(prev => ({ ...prev, currentUser: currentUserData }));
+        setLoadingView(prev => ({ ...prev, currentUser: false }));
+      }
+    };
+
+    fetchData();
+  }, [selectedCategoryId, username]);
 
   // Key handler for FlatList
-  const keyHandler = (item, index) => {
-    return index.toString();
-  };
+  const keyHandler = (item, index) => index.toString();
 
   // Render leaderboard item
-  const renderLeaderboard = ({ item, index }) => {
-    return (
-      <View style={styles.leaderboardItem}>
-        <Text>{index + 1}. {item.username}</Text>
-        <Text>{item.score} p</Text>
-      </View>
-    );
-  };
+  const renderLeaderboard = ({ item, index }) => (
+    <View style={styles.leaderboardItem}>
+      <Text>{index + 1}. {item.username}</Text>
+      <Text>{item.score} p</Text>
+    </View>
+  );
 
-  // Show loading spinner if data is being fetched
-  if (loading) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color="#0000ff" />
-      </View>
-    );
-  }
-
- // Create a component to render the leaderboard and picker view
- const renderLeaderboardView = () => (
-  <View style={styles.container}>
-    <View style={styles.contentContainerFull}>
+  // Render leaderboard view for 'allUsers'
+  const renderLeaderboardView = () => (
+    <View style={styles.container}>
+      <View style={styles.contentContainerFull}>
       <Text style={styles.title}>TOP 10 scores</Text>
-      {/* Picker to choose the category of the leaderboard */}
       <Text>From the category:</Text>
       <Picker
         selectedValue={selectedCategoryId}
         onValueChange={(itemValue) => setSelectedCategoryId(itemValue)}
-      >          
-        {categories.map(({ id, name }) => (<Picker.Item key={id} label={name} value={id} />  ))}
+      >
+        {categories.map(({ id, name }) => (
+          <Picker.Item key={id} label={name} value={id} />
+        ))}
       </Picker>
       
-      <FlatList style={styles.leaderboardStyle}
-        keyExtractor={keyHandler}
-        data={leaderboard}
-        renderItem={renderLeaderboard}
-      />
+      {loadingView.allUsers ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <FlatList
+          style={styles.leaderboardStyle}
+          keyExtractor={keyHandler}
+          data={leaderboardsView.allUsers}
+          renderItem={renderLeaderboard}
+        />
+      )}
     </View>
-  </View>
-);
+    </View>
+  );
 
-// Define scenes for each tab
-const renderScene = SceneMap({
-  allUsers: renderLeaderboardView,   // Same view for both tabs for now
-  currentUser: renderLeaderboardView, // You can customize this view later for the current user
-});
+  // Render leaderboard view for 'currentUser'
+  const renderUserLeaderboardView = () => (
+    <View style={styles.container}>
+      <View style={styles.contentContainerFull}>
+      <Text style={styles.title}>Your TOP scores</Text>
+      <Text>From the category:</Text>
+      <Picker
+        selectedValue={selectedCategoryId}
+        onValueChange={(itemValue) => setSelectedCategoryId(itemValue)}
+      >
+        {categories.map(({ id, name }) => (
+          <Picker.Item key={id} label={name} value={id} />
+        ))}
+      </Picker>
+      
+      {loadingView.currentUser ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <FlatList
+          style={styles.leaderboardStyle}
+          keyExtractor={keyHandler}
+          data={leaderboardsView.currentUser}
+          renderItem={renderLeaderboard}
+        />
+      )}
+    </View>
+    </View>
+  );
 
-return (
-  <TabView
-    navigationState={{ index, routes }}
-    renderScene={renderScene}
-    onIndexChange={setIndex}
-    initialLayout={{ width: '100%' }}
-    renderTabBar={props => <TabBar {...props} />}
-  />
-);
-};
+  // Define scenes for each tab
+  const renderScene = SceneMap({
+    allUsers: renderLeaderboardView,
+    currentUser: renderUserLeaderboardView,
+  });
+
+  return (
+    <TabView
+      navigationState={{ index, routes }}
+      renderScene={renderScene}
+      onIndexChange={setIndex}
+      initialLayout={{ width: '100%' }}
+      renderTabBar={props => <TabBar {...props} />}
+    />
+  );
+}
+
+export default LeaderboardScreen;
