@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, Alert, StyleSheet } from 'react-native';
+import { View, Text, Button, Alert, TextInput, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // For storing JWT securely
 import { useNavigation } from '@react-navigation/native'; // For navigation after logout
 import { UserScreenNavigationProp } from './navigationTypes'; // Import the navigation prop type
 
 const UserScreen = () => {
   const [username, setUsername] = useState('');
+  const [newUsername, setNewUsername] = useState(''); // State to store the new username
   const navigation = useNavigation<UserScreenNavigationProp>(); // Use the imported type for navigation
 
   // Fetch user data when the component mounts
@@ -19,8 +20,7 @@ const UserScreen = () => {
           return;
         }
 
-      //vaihda tää sit ku app on gcloudissa const response = await fetch('https://quizzleapp.lm.r.appspot.com/protected', {
-        const response = await fetch('http://192.168.101.100:3000/protected', {
+        const response = await fetch('https://quizzleapp.lm.r.appspot.com/protected', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`, // Pass the token for authentication
@@ -42,6 +42,44 @@ const UserScreen = () => {
     fetchUserData();
   }, []);
 
+  // Function to handle username update
+  const updateUsername = async () => {
+    if (!newUsername || newUsername.length < 3) {
+      Alert.alert('Error', 'Username must be at least 3 characters long.');
+      return;
+    }
+
+    try {
+      const token = await AsyncStorage.getItem('token'); // Retrieve token
+
+      if (!token) {
+        Alert.alert('Error', 'No token found');
+        return;
+      }
+
+      const response = await fetch('https://quizzleapp.lm.r.appspot.com/update-username', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`, // Send the token for authentication
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username: newUsername }), // Send the new username in the body
+      });
+
+      const data = await response.json(); // Parse the response
+
+      if (response.ok) {
+        setUsername(newUsername); // Update the displayed username
+        Alert.alert('Success', 'Username updated successfully!');
+      } else {
+        Alert.alert('Error', data.error || 'Failed to update username');
+      }
+    } catch (error) {
+      console.error('Error updating username:', error);
+      Alert.alert('Error', 'An error occurred while updating the username');
+    }
+  };
+
   // Function to handle user deletion
   const deleteUser = async () => {
     Alert.alert(
@@ -61,8 +99,7 @@ const UserScreen = () => {
                 return;
               }
     
-              //vaihda tää sit ku app on gcloudissa const response = await fetch('https://quizzleapp.lm.r.appspot.com/delete-user', {
-              const response = await fetch('http://192.168.101.100:3000/delete-user', {
+              const response = await fetch('https://quizzleapp.lm.r.appspot.com/delete-user', {
                 method: 'DELETE',
                 headers: {
                   'Authorization': `Bearer ${token}`, // Send the token for authentication
@@ -107,6 +144,17 @@ const UserScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.welcomeText}>Welcome, {username}!</Text>
+
+      {/* Input field for new username */}
+      <TextInput
+        style={styles.input}
+        placeholder="Enter new username"
+        value={newUsername}
+        onChangeText={setNewUsername} // Update newUsername state
+      />
+
+      <Button title="Update Username" onPress={updateUsername} color="blue" />
+
       <Button title="Logout" onPress={handleLogout} color="blue" />
 
       <View style={styles.deleteButtonContainer}>
@@ -127,6 +175,14 @@ const styles = StyleSheet.create({
   welcomeText: {
     fontSize: 20,
     marginBottom: 20,
+  },
+  input: {
+    width: '100%',
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    marginBottom: 10,
   },
   deleteButtonContainer: {
     marginTop: 20,
