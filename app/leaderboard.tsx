@@ -26,7 +26,7 @@ const LeaderboardScreen = () => {
   });
 
   const username = 'Iida';
-  
+
   const categories = [
     { id: 0, name: 'All' },
     { id: 10, name: 'Books' },
@@ -110,12 +110,18 @@ const LeaderboardScreen = () => {
       {loadingView.allUsers ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
+        <>
+            {leaderboardsView.allUsers.length === 0 ? (
+              <Text style={styles.noScores}>No scores yet</Text>  /* Show this message when there's no data */
+      ) : (
         <FlatList
           style={styles.leaderboardStyle}
           keyExtractor={keyHandler}
           data={leaderboardsView.allUsers}
           renderItem={renderLeaderboard}
         />
+        )}
+        </>
       )}
     </View>
     </View>
@@ -139,12 +145,18 @@ const LeaderboardScreen = () => {
       {loadingView.currentUser ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
+        <>
+            {leaderboardsView.allUsers.length === 0 ? (
+              <Text style={styles.noScores}>No scores yet</Text>  /* Show this message when there's no data */
+      ) : (
         <FlatList
           style={styles.leaderboardStyle}
           keyExtractor={keyHandler}
           data={leaderboardsView.currentUser}
           renderItem={renderLeaderboard}
         />
+      )}
+      </>
       )}
     </View>
     </View>

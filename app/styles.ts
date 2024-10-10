@@ -72,20 +72,18 @@ const styles = StyleSheet.create({
     // flexGrow: 0,    // Prevents FlatList from expanding vertically
   },
 
-/*
-an attempt to get the category picker to be next to text
-  leaderboardPicker:{
-    flexDirection: "row",
-    justifyContent: 'space-between', 
-  },
- */
   picker: {
     marginBottom: 5,
   },
   startButtonContainer: {
     marginTop: 10,
     alignItems: 'center',
-  }
+  },
+
+  noScores:{
+    textAlign: 'center'
+
+  },
 
 });
 
