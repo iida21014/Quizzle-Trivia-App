@@ -17,7 +17,7 @@ export default function QuizResult() {
       const response = await fetch('https://quizzleapp.lm.r.appspot.com/items', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json', // Added this so that backend knows it's receiving json
+          'Content-Type': 'application/json', // Telling backend it's receiving json
         },
         body: JSON.stringify({
           username: 'someUser',
@@ -27,7 +27,7 @@ export default function QuizResult() {
       });
   
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error! status: ${response.status}`); // Helps catching network errors or incorrect http status codes
       }
   
       const data = await response.json();
