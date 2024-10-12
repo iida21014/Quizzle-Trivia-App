@@ -3,6 +3,7 @@ import styles from './styles';
 import { View, Text, FlatList, ActivityIndicator, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LeaderboardScreen = () => {  
   const [leaderboard, setLeaderboard] = useState([]);
@@ -25,7 +26,27 @@ const LeaderboardScreen = () => {
     currentUser: true,
   });
 
-  const username = 'Iida';
+  const [username, setUsername] = useState('');
+
+  // Fetch the username from AsyncStorage when the component mounts
+  useEffect(() => {
+    const getUsername = async () => {
+      try {
+        const storedUsername = await AsyncStorage.getItem('username'); // Retrieve username from storage
+        if (storedUsername) {
+          setUsername(storedUsername); // Set the username if found
+        } else {
+          Alert.alert('Error', 'Username not found');
+        }
+      } catch (error) {
+        console.error('Error fetching username from storage:', error);
+        Alert.alert('Error', 'An error occurred while fetching the username');
+      }
+    };
+
+    getUsername();
+  }, []); // Empty dependency array to ensure it runs once when the component mounts
+
 
   const categories = [
     { id: 0, name: 'All' },

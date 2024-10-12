@@ -2,17 +2,39 @@ import { useEffect, useState } from 'react';
 import { View, Text } from 'react-native';
 import { useLocalSearchParams, Link } from 'expo-router';
 import styles from './styles';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function QuizResult() {
   // Reading game results which have been set by Quiz view when navigating here
   const { totalPoints, categoryId } = useLocalSearchParams();
+
+  const [username, setUsername] = useState('');
+
+  // Fetch the username from AsyncStorage when the component mounts
+  useEffect(() => {
+    const getUsername = async () => {
+      try {
+        const storedUsername = await AsyncStorage.getItem('username'); // Retrieve username from storage
+        if (storedUsername) {
+          setUsername(storedUsername); // Set the username if found
+        } else {
+          Alert.alert('Error', 'Username not found');
+        }
+      } catch (error) {
+        console.error('Error fetching username from storage:', error);
+        Alert.alert('Error', 'An error occurred while fetching the username');
+      }
+    };
+
+    getUsername();
+  }, []); // Empty dependency array to ensure it runs once when the component mounts
   
   // State for showing leaderboard position and pesronal record
   // const { leaderboardPosition, setLeaderboardPosition } = useState(null);
   // const { isPersonalRecord, setIsPersonalRecord } = useState(false)
   
   // Sends user points to backend and sets leaderboard results to the UI
-  async function postPlayerPoints(score, category) {
+  async function postPlayerPoints(username, score, category, ) {
     try {
       const response = await fetch('https://quizzleapp.lm.r.appspot.com/items', {
         method: 'POST',
@@ -20,7 +42,7 @@ export default function QuizResult() {
           'Content-Type': 'application/json', // Telling backend it's receiving json
         },
         body: JSON.stringify({
-          username: 'someUser',
+          username,
           score,
           category,
         }),
@@ -66,11 +88,11 @@ export default function QuizResult() {
 
   // When view initializes, sending game results to backend
   useEffect(() => {
-    console.log('totalPoints:', totalPoints, 'categoryId:', categoryId); // This is for debugging
-    if (totalPoints && categoryId) {
-      postPlayerPoints(totalPoints, categoryId);
+    if (username && totalPoints && categoryId) {
+      console.log('username:', username, 'totalPoints:', totalPoints, 'categoryId:', categoryId); // This is for debugging
+      postPlayerPoints(username,totalPoints, categoryId);
     }
-  }, [totalPoints, categoryId]);
+  }, [username, totalPoints, categoryId]); // Only run when username is fetched and totalPoints/categoryId are valid
   
   return (
     <View style={styles.container}>

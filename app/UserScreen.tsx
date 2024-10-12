@@ -30,6 +30,7 @@ const UserScreen = () => {
         if (response.ok) {
           const data = await response.json();
           setUsername(data.user.username); // Set the username
+          await AsyncStorage.setItem('username', data.user.username); // Store username in AsyncStorage
         } else {
           Alert.alert('Error', 'Failed to fetch user data');
         }
@@ -70,6 +71,7 @@ const UserScreen = () => {
 
       if (response.ok) {
         setUsername(newUsername); // Update the displayed username
+        await AsyncStorage.setItem('username', newUsername); // Store new username in AsyncStorage
         Alert.alert('Success', 'Username updated successfully!');
       } else {
         Alert.alert('Error', data.error || 'Failed to update username');
@@ -112,8 +114,9 @@ const UserScreen = () => {
                 // Show success alert and log out the user
                 Alert.alert('Success', 'Your account has been deleted.');
 
-                // Remove the JWT token from AsyncStorage
+                // Remove the JWT token and username from AsyncStorage
                 await AsyncStorage.removeItem('token');
+                await AsyncStorage.removeItem('username');
 
                 // Navigate back to the login screen after deletion
                 navigation.navigate('LoginScreen'); // Navigate to the login screen
@@ -134,6 +137,7 @@ const UserScreen = () => {
   const handleLogout = async () => {
     try {
       await AsyncStorage.removeItem('token'); // Remove the JWT token
+      await AsyncStorage.removeItem('username'); // Remove the username from storage
       navigation.navigate('LoginScreen'); // Navigate to the login screen
     } catch (error) {
       console.error('Error logging out:', error);
