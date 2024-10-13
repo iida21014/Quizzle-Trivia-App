@@ -41,8 +41,8 @@ const LoginScreen = () => {
             {
               text: 'OK',
               onPress: () => {
-                console.log('Navigating to UserScreen'); // Debug log
-                navigation.navigate('UserScreen'); // Navigate to UserScreen after successful login
+                console.log('Navigating to start screen'); // Debug log
+                navigation.navigate('index'); // Navigate to UserScreen after successful login
               },
             },
           ],
