@@ -5,6 +5,8 @@ import { decode } from 'he';
 import styles from './styles';
 import { QuestionCard } from './QuestionCard';
 import { TokenContext } from '../TokenContext';
+import TimeLeftBar from './TimeLeftBar';
+
 import { Audio } from 'expo-av';
 
  
@@ -243,6 +245,7 @@ export default function Quiz() {
         <View style={styles.contentContainerFull}>
           {questions.length > 0 && questionIndex != null && (
             <>
+              <TimeLeftBar timeLeft={secondsLeft} maximumTime={getInitialAnswerTimeInSeconds()} />
               <QuestionCard
                 questionIndex={questionIndex}
                 questionData={questions[questionIndex]}

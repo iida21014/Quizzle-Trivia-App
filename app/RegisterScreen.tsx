@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Alert, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { RegisterScreenNavigationProp } from './navigationTypes';
+import styles from './styles';
 
 const RegisterScreen = () => {
   const navigation = useNavigation<RegisterScreenNavigationProp>();
@@ -68,33 +69,18 @@ const RegisterScreen = () => {
         value={password}
         onChangeText={setPassword}
       />
-      <Button
-        title={loading ? 'Registering...' : 'Register'}
+      <TouchableOpacity
+        style={[styles.button, loading && styles.disabledButton]} // Apply different styles if loading
         onPress={handleRegister}
         disabled={loading}
-      />
+      >
+        <Text style={styles.buttonText}>
+          {loading ? 'Registering...' : 'Register'}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  input: {
-    borderWidth: 1,
-    padding: 10,
-    marginVertical: 10,
-    borderRadius: 5,
-  },
-});
 
 export default RegisterScreen;
