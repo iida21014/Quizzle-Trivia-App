@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Alert, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { LoginScreenNavigationProp } from './navigationTypes';
+import styles from './styles';
 
 const LoginScreen = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
@@ -81,35 +82,21 @@ const LoginScreen = () => {
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
-        <Button
-          title="Login"
+        <TouchableOpacity
+          style={[
+            styles.button,
+            (!username || !password || loading) && styles.disabledButton,
+          ]}
           onPress={handleLogin}
-          disabled={!username || !password || loading} // Disable login if fields are empty or loading
-        />
+          disabled={!username || !password || loading} // Disable button if fields are empty or loading
+        >
+          <Text style={styles.buttonText}>
+            {loading ? 'Logging in...' : 'Login'}
+          </Text>
+        </TouchableOpacity>
       )}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  input: {
-    borderWidth: 1,
-    padding: 10,
-    marginVertical: 10,
-    borderRadius: 5,
-    borderColor: '#ccc',
-  },
-});
 
 export default LoginScreen;

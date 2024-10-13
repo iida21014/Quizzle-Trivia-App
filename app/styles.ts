@@ -54,9 +54,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginVertical: 10,        // Space between buttons
   },
+  deleteButtonContainer: {
+    backgroundColor: 'red',
+    width: 200,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 10,        // Space between buttons
+  },
   buttonText: {
     color: '#fff',             // White text color
     fontSize: 16,
+  },
+  disabledButton: {
+    backgroundColor: '#ccc',
   },
   leaderboardItem:{
     width: '100%',
@@ -83,6 +95,19 @@ const styles = StyleSheet.create({
   noScores:{
     textAlign: 'center'
 
+  },
+  welcomeText: {
+    fontSize: 20,
+    marginBottom: 20,
+  },
+  input: {
+    width: '100%',
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    marginBottom: 10,
+    backgroundColor: 'white',
   },
 
 });

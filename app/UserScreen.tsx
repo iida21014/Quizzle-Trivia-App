@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, Alert, TextInput, StyleSheet } from 'react-native';
+import { View, Text, Alert, TextInput, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // For storing JWT securely
 import { useNavigation } from '@react-navigation/native'; // For navigation after logout
 import { UserScreenNavigationProp } from './navigationTypes'; // Import the navigation prop type
+import styles from './styles';
 
 const UserScreen = () => {
   const [username, setUsername] = useState('');
@@ -156,41 +157,20 @@ const UserScreen = () => {
         value={newUsername}
         onChangeText={setNewUsername} // Update newUsername state
       />
+      <TouchableOpacity style={styles.button} onPress={updateUsername}>
+        <Text style={styles.buttonText}>Update Username</Text>
+      </TouchableOpacity>
 
-      <Button title="Update Username" onPress={updateUsername} color="blue" />
+      <TouchableOpacity style={styles.button} onPress={handleLogout}>
+        <Text style={styles.buttonText}>Logout</Text>
+      </TouchableOpacity>
 
-      <Button title="Logout" onPress={handleLogout} color="blue" />
 
-      <View style={styles.deleteButtonContainer}>
-        <Button title="Delete Account" color="red" onPress={deleteUser} />
-      </View>
+      <TouchableOpacity style={styles.deleteButtonContainer} onPress={deleteUser}>
+        <Text style={styles.buttonText}>Delete account</Text>
+      </TouchableOpacity>
     </View>
   );
 };
-
-// Styling for the UserScreen
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  welcomeText: {
-    fontSize: 20,
-    marginBottom: 20,
-  },
-  input: {
-    width: '100%',
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    marginBottom: 10,
-  },
-  deleteButtonContainer: {
-    marginTop: 20,
-  },
-});
 
 export default UserScreen;
