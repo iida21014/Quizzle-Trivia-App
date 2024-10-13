@@ -5,6 +5,7 @@ import { decode } from 'he';
 import styles from './styles';
 import { QuestionCard } from './QuestionCard';
 import { TokenContext } from '../TokenContext';
+import TimeLeftBar from './TimeLeftBar';
 
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
@@ -210,6 +211,7 @@ export default function Quiz() {
         <View style={styles.contentContainerFull}>
           {questions.length > 0 && questionIndex != null && (
             <>
+              <TimeLeftBar timeLeft={secondsLeft} maximumTime={getInitialAnswerTimeInSeconds()} />
               <QuestionCard
                 questionIndex={questionIndex}
                 questionData={questions[questionIndex]}
