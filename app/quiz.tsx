@@ -110,6 +110,8 @@ export default function Quiz() {
         setQuestionIndex((prevIndex) => prevIndex + 1);
       } else {
 
+        stopMusic();
+
         // Navigating to result page and passing category and points as parameters
         router.replace({
           pathname: '/quizResult',
