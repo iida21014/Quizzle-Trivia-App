@@ -6,7 +6,6 @@ import styles from './styles';
 import { QuestionCard } from './QuestionCard';
 import { TokenContext } from '../TokenContext';
 import TimeLeftBar from './TimeLeftBar';
-
 import { Audio } from 'expo-av';
 
  
@@ -65,9 +64,29 @@ export default function Quiz() {
   const [pickedAlternative, setAlternative] = useState(null);
   const [showResult, setShowResult] = useState(false); // State to show result of answer
   const [showTimeout, setShowTimeout] = useState(false); // State to show the timeout message
+  const [music, setMusic] = useState();
   const [sound, setSound] = useState();
+  
+  async function playMusic() {
+    console.log('Loading music');
+    const { sound } = await Audio.Sound.createAsync(require('../assets/sounds/gameMusic.wav'));
+    setMusic(sound);
+    await sound.setIsLoopingAsync(true);
+    console.log('Playing music');
+    await sound.playAsync();
+  };
 
-      // Function to play a sound effect
+    // Function to stop the music
+    async function stopMusic() {
+      if (music) {
+        console.log('Stopping music');
+        await music.stopAsync();  // Stop the music
+        setMusic(null);  // Clear the music state
+      }
+    };
+  
+
+      // Function to play sound effects
   async function playSound(soundFile) {
     console.log('Loading sound:', soundFile);
     const { sound } = await Audio.Sound.createAsync(soundFile);
@@ -76,15 +95,6 @@ export default function Quiz() {
     await sound.playAsync();
   }
 
-  // Unload the sound to free up memory when done
-  React.useEffect(() => {
-    return sound
-      ? () => {
-          console.log('Unloading sound');
-          sound.unloadAsync();
-        }
-      : undefined;
-  }, [sound]);
 
   // Paths to your sound files
   const sounds = {
@@ -121,6 +131,7 @@ export default function Quiz() {
   }
 
   async function generateQuiz() {
+    playMusic();
     if (!token) {
       console.error('No token available. Please generate a token first.');
       return;
