@@ -3,12 +3,51 @@ import { View, Text } from 'react-native';
 import { useLocalSearchParams, Link } from 'expo-router';
 import styles from './styles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Audio } from 'expo-av';
+import ConfettiCannon from 'react-native-confetti-cannon';
 
 export default function QuizResult() {
-  // Reading game results which have been set by Quiz view when navigating here
-  const { totalPoints, categoryId } = useLocalSearchParams();
-
+  const { totalPoints, categoryId } = useLocalSearchParams();   // Reading game results which have been set by Quiz view when navigating here
+  const [sound, setSound] = useState(null);
   const [username, setUsername] = useState('');
+  const [ leaderboardPosition, setLeaderboardPosition ] = useState(null);   // State for showing leaderboard position
+  const [ isPersonalRecord, setIsPersonalRecord ] = useState(false)   // State for showing personal record
+  const [showConfetti, setShowConfetti] = useState(false); // State for showing confetti
+
+  // Paths to the sound files
+  const sounds = {
+    doubleScore: require('../assets/sounds/doubleScore.wav'),
+    personal: require('../assets/sounds/personalRecord.mp3'),
+    leaderboard: require('../assets/sounds/leaderboardScore.wav'),
+    noRecord: require('../assets/sounds/noRecord.wav'),
+  };  
+
+  // Function to play sound effects (only one sound should play at a time)
+  async function playSound(soundFile) {
+    if (sound) {
+      console.log('Stopping previous sound');
+      await sound.stopAsync();
+      await sound.unloadAsync(); // Unload previous sound
+    }
+
+    console.log('Loading sound:', soundFile);
+    const { sound: newSound } = await Audio.Sound.createAsync(soundFile);
+    setSound(newSound);
+    console.log('Playing sound');
+    await newSound.playAsync();
+  }
+
+  // Cleanup function to unload the sound when the component unmounts
+   useEffect(() => {
+    return sound
+      ? () => {
+          console.log('Unloading sound');
+          sound.unloadAsync();
+        }
+      : undefined;
+  }, [sound]);
+
+
 
   // Fetch the username from AsyncStorage when the component mounts
   useEffect(() => {
@@ -28,11 +67,9 @@ export default function QuizResult() {
 
     getUsername();
   }, []); // Empty dependency array to ensure it runs once when the component mounts
-  
-  // State for showing leaderboard position and pesronal record
-  const [ leaderboardPosition, setLeaderboardPosition ] = useState(null);
-  const [ isPersonalRecord, setIsPersonalRecord ] = useState(false)
-  
+
+
+
   // Sends user points to backend and sets leaderboard results to the UI
   async function postPlayerPoints(username, score, category, ) {
     try {
@@ -47,13 +84,13 @@ export default function QuizResult() {
           category: parseInt(category, 10), // Ensure category is an integer
         }),
       });
-  
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`); // Helps catching network errors or incorrect http status codes
       }
-  
+
       const data = await response.json();
-      // Process leaderboard and personal record from response
+    // Process leaderboard and personal record from response
       console.log('Response data:', data);
       setLeaderboardPosition(data.leaderboardPosition);
       setIsPersonalRecord(data.isPersonalRecord);
@@ -62,13 +99,33 @@ export default function QuizResult() {
     }
   }
 
-    // When view initializes, sending game results to backend
+  // When view initializes, sending game results to backend
     useEffect(() => {
       if (username && totalPoints && categoryId) {
         console.log('username:', username, 'totalPoints:', totalPoints, 'categoryId:', categoryId); // This is for debugging
         postPlayerPoints(username,totalPoints, categoryId);
       }
     }, [username, totalPoints, categoryId]); // Only run when username is fetched and totalPoints/categoryId are valid
+
+
+  // Play sounds based on leaderboard position and personal record
+  useEffect(() => {
+    if (leaderboardPosition !== null || isPersonalRecord) {
+      // Determine which sound to play (based on priority)
+      if (leaderboardPosition === -1) {
+        playSound(sounds.noRecord); // Didn't reach leaderboard
+      } else if (isPersonalRecord && leaderboardPosition !== null) {
+        playSound(sounds.doubleScore); // Double victory!
+        setShowConfetti(true); // Trigger confetti
+      } else if (leaderboardPosition !== null) {
+        playSound(sounds.leaderboard); // Leaderboard achievement
+        setShowConfetti(true); // Trigger confetti
+      } else if (isPersonalRecord) {
+        playSound(sounds.personal); // Personal record but no leaderboard
+        setShowConfetti(true); // Trigger confetti
+      }
+    }
+  }, [leaderboardPosition, isPersonalRecord]); // Only trigger when these states change
 
   // Returns UI element which shows leaderboard-related information
   // Renders both leaderboard and personal record conditions
@@ -79,7 +136,7 @@ export default function QuizResult() {
 
     if (leaderboardPosition !== null && isPersonalRecord) {
       return (
-        
+
         <Text style={styles.quizResultText}>🏆 Double victory! 🏆{"\n"}You've set a new personal record and reached leaderboard position {leaderboardPosition}!{"\n"}Keep up the amazing work! 🎉</Text>
       );
     }
@@ -95,15 +152,25 @@ export default function QuizResult() {
     return null;
   };
 
-  
+
   return (
     <View style={styles.container}>
       <View style={styles.contentContainerFull}>
         <Text style={styles.title}>Game ended</Text>
-        
+
         <Text style={styles.quizResultText}>You got {totalPoints} points! 🎯</Text>
        {/* Display the special achievements message */}
        {renderSpecialAchievements()}
+
+       {/* Render confetti cannon when special achievements are met */}
+       {showConfetti && (
+          <ConfettiCannon
+            count={2000}
+            origin={{ x: -10, y: 0 }}
+            fadeOut={true}
+            explosionSpeed={350}
+          />
+        )}
 
         {/* A button for playing a new game */}
         <View style={styles.startButtonContainer}>
@@ -117,7 +184,7 @@ export default function QuizResult() {
             </Link>
           </View>
         </View>
-      </View>        
+      </View>
     </View>
   );
 }

@@ -96,7 +96,7 @@ export default function Quiz() {
   }
 
 
-  // Paths to your sound files
+  // Paths to the sound files
   const sounds = {
     correct: require('../assets/sounds/correct.wav'),
     incorrect: require('../assets/sounds/incorrect.wav'),
