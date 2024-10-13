@@ -215,6 +215,7 @@ app.get('/leaderboard', async (req, res) => {
   }
 });
 
+
 // POST to database
 app.post('/items', async (req, res) => {
   try {
@@ -225,6 +226,47 @@ app.post('/items', async (req, res) => {
     res.status(500).send('Error adding item');
   }
 });
+
+// POST to database with leaderboard and personal record checks
+app.post('/leaderboard', async (req, res) => {
+  try {
+    const { username, score, category } = req.body;
+
+    // Insert the new score into the database
+    const newItem = { username, score, category };
+    await itemsCollection.insertOne(newItem);
+
+    // Check if the score qualifies for the top 10 in this category
+    const leaderboard = await itemsCollection
+      .find({ category })
+      .sort({ score: -1 })  // Sort by score in descending order
+      .limit(10)            // Limit to top 10
+      .toArray();
+
+    let leaderboardPosition = -1;
+    for (let i = 0; i < leaderboard.length; i++) {
+      if (leaderboard[i].username === username && leaderboard[i].score === score) {
+        leaderboardPosition = i + 1; 
+        break;
+      }
+    }
+
+    // Check if this is a personal record (highest score for the user in the given category)
+    const personalBest = await itemsCollection
+      .find({ username, category })
+      .sort({ score: -1 })  // Sort by score in descending order
+      .limit(1)             // Get the highest score
+      .toArray();
+
+    const isPersonalRecord = personalBest.length > 0 && personalBest[0].score <= score;
+
+    res.json({ leaderboardPosition, isPersonalRecord });
+  } catch (err) {
+    console.error('Error adding item', err);
+    res.status(500).send('Error adding item');
+  }
+});
+
 
 // DELETE an item by ID
 app.delete('/items/:id', async (req, res) => {

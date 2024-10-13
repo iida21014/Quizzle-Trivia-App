@@ -30,13 +30,13 @@ export default function QuizResult() {
   }, []); // Empty dependency array to ensure it runs once when the component mounts
   
   // State for showing leaderboard position and pesronal record
-  // const { leaderboardPosition, setLeaderboardPosition } = useState(null);
-  // const { isPersonalRecord, setIsPersonalRecord } = useState(false)
+  const [ leaderboardPosition, setLeaderboardPosition ] = useState(null);
+  const [ isPersonalRecord, setIsPersonalRecord ] = useState(false)
   
   // Sends user points to backend and sets leaderboard results to the UI
   async function postPlayerPoints(username, score, category, ) {
     try {
-      const response = await fetch('https://quizzleapp.lm.r.appspot.com/items', {
+      const response = await fetch('https://quizzleapp.lm.r.appspot.com/leaderboard', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json', // Telling backend it's receiving json
@@ -53,55 +53,57 @@ export default function QuizResult() {
       }
   
       const data = await response.json();
-      // Process the response here if needed, e.g. setting leaderboard data
+      // Process leaderboard and personal record from response
       console.log('Response data:', data);
-      // setLeaderboardPosition(data.leaderboardPosition);
-      // setIsPersonalRecord(data.isPersonalRecord);
+      setLeaderboardPosition(data.leaderboardPosition);
+      setIsPersonalRecord(data.isPersonalRecord);
     } catch (error) {
       console.error('Could not save leaderboard points', error);
     }
   }
 
-  // // Returns UI element which shows leaderboard-related information
-  // function renderLeaderboardPosition() {
-  //   // Leaderboard position not fetched from the backend, returning nothing
-  //   if (leaderboardPosition == null) {
-  //     return null;
-  //   }
+    // When view initializes, sending game results to backend
+    useEffect(() => {
+      if (username && totalPoints && categoryId) {
+        console.log('username:', username, 'totalPoints:', totalPoints, 'categoryId:', categoryId); // This is for debugging
+        postPlayerPoints(username,totalPoints, categoryId);
+      }
+    }, [username, totalPoints, categoryId]); // Only run when username is fetched and totalPoints/categoryId are valid
 
-  //   // Score didn't reacth the leaderboard
-  //   if (leaderboardPosition === -1) {
-  //     return <Text>Sorry, you couldn't reach the leaderboard</Text>
-  //   }
-
-  //   return <Text>Congratulations! You reached leaderboard position {leaderboardPosition}</Text>
-  // }
-
-  // // Returns a UI element for notifying about personal record
-  // function renderPersonalRecord() {
-  //   if (!isPersonalRecord) {
-  //     return null;
-  //   }
-
-  //   return <Text>It's a new personal record!</Text>
-  // }
-
-  // When view initializes, sending game results to backend
-  useEffect(() => {
-    if (username && totalPoints && categoryId) {
-      console.log('username:', username, 'totalPoints:', totalPoints, 'categoryId:', categoryId); // This is for debugging
-      postPlayerPoints(username,totalPoints, categoryId);
+  // Returns UI element which shows leaderboard-related information
+  // Renders both leaderboard and personal record conditions
+  const renderSpecialAchievements = () => {
+    if (leaderboardPosition === -1) {
+      return <Text style={styles.quizResultText}>😞 Sorry! 😞{"\n"}You didn't reach the leaderboard this time.</Text>;
     }
-  }, [username, totalPoints, categoryId]); // Only run when username is fetched and totalPoints/categoryId are valid
+
+    if (leaderboardPosition !== null && isPersonalRecord) {
+      return (
+        
+        <Text style={styles.quizResultText}>🏆 Double victory! 🏆{"\n"}You've set a new personal record and reached leaderboard position {leaderboardPosition}!{"\n"}Keep up the amazing work! 🎉</Text>
+      );
+    }
+
+    if (leaderboardPosition !== null) {
+      return <Text style={styles.quizResultText}>🎉 Congratulations! 🎉{"\n"}You've reached leaderboard position {leaderboardPosition}!</Text>;
+    }
+
+    if (isPersonalRecord) {
+      return <Text style={styles.quizResultText}>🔥 It's a new personal record! 🔥{"\n"}Keep going!</Text>;
+    }
+
+    return null;
+  };
+
   
   return (
     <View style={styles.container}>
       <View style={styles.contentContainerFull}>
         <Text style={styles.title}>Game ended</Text>
         
-        <Text>You got {totalPoints} points!</Text>
-        {/* {renderLeaderboardPosition()}
-        {renderPersonalRecord()} */}
+        <Text style={styles.quizResultText}>You got {totalPoints} points! 🎯</Text>
+       {/* Display the special achievements message */}
+       {renderSpecialAchievements()}
 
         {/* A button for playing a new game */}
         <View style={styles.startButtonContainer}>
