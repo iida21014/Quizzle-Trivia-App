@@ -43,8 +43,8 @@ export default function QuizResult() {
         },
         body: JSON.stringify({
           username,
-          score,
-          category,
+          score: parseInt(score, 10),     // Ensure score is an integer
+          category: parseInt(category, 10), // Ensure category is an integer
         }),
       });
   
