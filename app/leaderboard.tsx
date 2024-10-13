@@ -4,8 +4,11 @@ import { View, Text, FlatList, ActivityIndicator, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Audio } from 'expo-av';
+
 
 const LeaderboardScreen = () => {  
+  const [sound, setSound] = useState();
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true); // For loading state
   const [error, setError] = useState(null);     // For error handling
@@ -15,6 +18,28 @@ const LeaderboardScreen = () => {
     { key: 'allUsers', title: 'All' },
     { key: 'currentUser', title: 'You' },
   ]);
+
+    // // Function to play the sound
+    // async function playSound() {
+    //   console.log('Loading Sound');
+    //   const { sound } = await Audio.Sound.createAsync(
+    //      require('./assets/sounds.mp3')  // or a remote URL
+    //   );
+    //   setSound(sound);
+  
+    //   console.log('Playing Sound');
+    //   await sound.playAsync(); 
+    // }
+  
+    // // Unload sound to free up memory when component unmounts
+    // React.useEffect(() => {
+    //   return sound
+    //     ? () => {
+    //         console.log('Unloading Sound');
+    //         sound.unloadAsync();
+    //       }
+    //     : undefined;
+    // }, [sound]);
 
   const [leaderboardsView, setLeaderboardsView] = useState({
     allUsers: [],

@@ -1,11 +1,13 @@
-import { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { View, Text } from 'react-native';
 import { decode } from 'he';
 import styles from './styles';
 import { QuestionCard } from './QuestionCard';
 import { TokenContext } from '../TokenContext';
+import { Audio } from 'expo-av';
 
+ 
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -61,6 +63,33 @@ export default function Quiz() {
   const [pickedAlternative, setAlternative] = useState(null);
   const [showResult, setShowResult] = useState(false); // State to show result of answer
   const [showTimeout, setShowTimeout] = useState(false); // State to show the timeout message
+  const [sound, setSound] = useState();
+
+      // Function to play a sound effect
+  async function playSound(soundFile) {
+    console.log('Loading sound:', soundFile);
+    const { sound } = await Audio.Sound.createAsync(soundFile);
+    setSound(sound);
+    console.log('Playing sound');
+    await sound.playAsync();
+  }
+
+  // Unload the sound to free up memory when done
+  React.useEffect(() => {
+    return sound
+      ? () => {
+          console.log('Unloading sound');
+          sound.unloadAsync();
+        }
+      : undefined;
+  }, [sound]);
+
+  // Paths to your sound files
+  const sounds = {
+    correct: require('../assets/sounds/correct.wav'),
+    incorrect: require('../assets/sounds/incorrect.wav'),
+  };
+
 
   // Waits for 2 seconds and then clears UI and shows the next question
   function moveOnToNextQuestion() {
@@ -194,10 +223,14 @@ export default function Quiz() {
     const answerTimeInMilliSeconds = new Date().getTime() - questionAskedAt.getTime();
 
     if (isAnswerCorrect) {
+      playSound(sounds.correct);
       const answerPoints = calculatePoints(answerTimeInMilliSeconds, questions[questionIndex].difficulty);
       setAnswerPoints(answerPoints);
       setPlayerPoints(currentPoints => currentPoints + answerPoints);
     }
+    else{
+      playSound(sounds.incorrect);
+    };
     
     moveOnToNextQuestion();
   };
