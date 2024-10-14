@@ -1,7 +1,6 @@
 import { Stack } from 'expo-router';
 import { TokenProvider } from '../TokenContext';
 import { Button } from 'react-native';
-
 export default function RootLayout() {
   return (
     <TokenProvider>
@@ -20,20 +19,6 @@ export default function RootLayout() {
         <Stack.Screen 
           options={({ navigation }) => ({
             title: 'Home',
-            headerRight: () => (
-              <>
-                <Button 
-                  onPress={() => navigation.navigate('LoginScreen')} 
-                  title="Login"
-                  color="#000000"
-                />
-                <Button 
-                  onPress={() => navigation.navigate('UserScreen')} 
-                  title="User Info"
-                  color="#000000"
-                />
-              </>
-            ),
           })} 
           name="index" 
         />
@@ -43,58 +28,24 @@ export default function RootLayout() {
         <Stack.Screen options={{ title: 'Quiz result' }} name="quizResult" />
         <Stack.Screen options={{ title: 'Quiz' }} name="quiz" />
         <Stack.Screen options={{ title: 'Leaderboard' }} name="leaderboard" />
-        
-         {/* Login Screen */}
-         <Stack.Screen 
-          options={({ navigation }) => ({
-            title: 'Login',
-            headerRight: () => (
-              <>
+        {/* Login Screen */}
+      <Stack.Screen 
+        options={({ navigation }) => ({
+          title: 'Login',
+          headerRight: () => (
+            <>
                 <Button 
                   onPress={() => navigation.navigate('RegisterScreen')} 
                   title="Register"
                   color="#000000"
                 />
-                <Button 
-                  onPress={() => navigation.navigate('UserScreen')} 
-                  title="User Info"
-                  color="#000000"
-                />
-              </>
-            ),
-          })} 
-          name="LoginScreen" 
-        />
-        
-        {/* User Screen */}
-        <Stack.Screen 
-          options={({ navigation }) => ({
-            headerTitle: 'User Info',
-            headerRight: () => (
-              <Button 
-                onPress={() => navigation.navigate('LoginScreen')} 
-                title="Login"
-                color="#000000"
-              />
-            ),
-          })} 
-          name="UserScreen" 
-        />
-
-        {/* Register Screen */}
-        <Stack.Screen 
-          options={({ navigation }) => ({
-            headerTitle: 'Register',
-            headerRight: () => (
-              <Button 
-                onPress={() => navigation.navigate('LoginScreen')} 
-                title="Login"
-                color="#000000"
-              />
-            ),
-          })} 
-          name="RegisterScreen" 
-        />
+            </>
+          ),
+        })} 
+        name="LoginScreen" 
+      />
+        <Stack.Screen options={{ title: 'Register' }} name="RegisterScreen" />
+        <Stack.Screen options={{ title: 'User Info' }} name="UserScreen" />
       </Stack>
     </TokenProvider>
   );

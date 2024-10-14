@@ -14,40 +14,35 @@ const LoginScreen = () => {
   const handleLogin = async () => {
     setLoading(true);
     try {
-      // Log the username and password before sending the request
       console.log('Attempting to log in with:', { username, password });
   
-      //vaihda tää sit ku app on gcloudissa 
-          const response = await fetch('https://quizzleapp.lm.r.appspot.com/login', {
-        //const response = await fetch('http://192.168.101.100:3000/login', {
+      const response = await fetch('https://quizzleapp.lm.r.appspot.com/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ username, password }),
       });
-
-      // Log the response status code and data for debugging purposes
+  
       console.log('Response status:', response.status);
       const data = await response.json();
       console.log('Response data:', data);
-
+  
       if (response.ok) {
         await AsyncStorage.setItem('token', data.token); // Store the token securely
-        Alert.alert(
-          'Success',
-          'Login successful',
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                console.log('Navigating to start screen'); // Debug log
-                navigation.navigate('index'); // Navigate to UserScreen after successful login
-              },
+        Alert.alert('Success', 'Login successful', [
+          {
+            text: 'OK',
+            onPress: () => {
+              console.log('Navigating to start screen');
+              // Use navigation.replace to reset the stack and go to home screen
+              navigation.reset({
+                index: 0, // Ensure the home screen is the only one in the stack
+                routes: [{ name: 'index' }], // Name of your home screen
+              });
             },
-          ],
-          { cancelable: false }
-        );
+          },
+        ]);
       } else {
         Alert.alert('Login failed', data.error || 'Invalid credentials');
       }
@@ -58,7 +53,7 @@ const LoginScreen = () => {
       setLoading(false);
     }
   };
-
+  
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Login</Text>

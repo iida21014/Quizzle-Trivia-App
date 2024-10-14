@@ -120,7 +120,7 @@ const UserScreen = () => {
                 await AsyncStorage.removeItem('username');
 
                 // Navigate back to the login screen after deletion
-                navigation.navigate('LoginScreen'); // Navigate to the login screen
+                navigation.replace('LoginScreen'); // Navigate to the login screen
               } else {
                 Alert.alert('Error', data.error || 'Failed to delete account');
               }
