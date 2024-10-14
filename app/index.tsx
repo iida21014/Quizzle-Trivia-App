@@ -33,23 +33,15 @@ export default function HomeScreen() {
           style={styles.logo}
           resizeMode="contain"
         />
-
-        {/* Conditionally render "Login" or "User Info" button based on login status */}
-        {!loggedIn ? (
-          <TouchableOpacity 
-            style={styles.button}
-            onPress={() => router.push('/LoginScreen')}  // Navigate to Login screen
-          >
-            <Text style={styles.buttonText}>Login</Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity 
-            style={styles.button}
-            onPress={() => router.push('/UserScreen')}  // Navigate to User Info screen
-          >
-            <Text style={styles.buttonText}>User Info</Text>
-          </TouchableOpacity>
-        )}
+        {/* Render "Login" button when not logged in */}
+      {!loggedIn && (
+        <TouchableOpacity 
+          style={styles.button}
+          onPress={() => router.push('/LoginScreen')}  // Navigate to Login screen
+        >
+          <Text style={styles.buttonText}>Login</Text>
+        </TouchableOpacity>
+      )}
 
         {/* Button for Play Game */}
         <TouchableOpacity 
@@ -59,14 +51,25 @@ export default function HomeScreen() {
           <Text style={styles.buttonText}>Play Game</Text>
         </TouchableOpacity>
 
-        {/* Button for Leaderboard */}
+      {/* Button for Leaderboard */}
         <TouchableOpacity 
           style={styles.button}
           onPress={() => router.push('/leaderboard')}  // Navigate to Leaderboard screen
         >
           <Text style={styles.buttonText}>Leaderboard</Text>
         </TouchableOpacity>
+
+      {/* Render "User Info" button at the bottom when logged in */}
+      {loggedIn && (
+          <TouchableOpacity 
+            style={styles.button}
+            onPress={() => router.push('/UserScreen')}  // Navigate to User Info screen
+          >
+            <Text style={styles.buttonText}>User Info</Text>
+          </TouchableOpacity>
+      )}
       </View>
+
     </View>
   );
 }
