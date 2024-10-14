@@ -118,6 +118,13 @@ const styles = StyleSheet.create({
   quizResultText: {
     fontWeight: 'bold',
   },
+  timeLeftBarContainer: {
+    width: '100%',
+    marginBottom: 20,
+  },
+  timeLeftBar: {
+    height: 20,
+  },
 });
 
 export default styles;

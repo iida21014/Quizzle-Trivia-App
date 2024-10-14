@@ -1,13 +1,16 @@
 import { useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import Animated, { useSharedValue, useDerivedValue, Easing, withTiming, useAnimatedStyle, ReduceMotion } from 'react-native-reanimated';
+import styles from './styles';
 
 // Converts a time in seconds into a percentage
 function convertTimeLeftToPercentage(timeLeft, maximumTime) {
   return parseInt((timeLeft / maximumTime) * 100);
 }
 
-export default function TimeLeftBar({ timeLeft, maximumTime}) {
+const secondAsPercentage = 5; // maximum time 20 seconds, 1 seconds means 5 percent
+
+export default function TimeLeftBar({ timeLeft, maximumTime }) {
   // Shared value to hold width of the bar as percent
   const widthAsPercentage = useSharedValue(100);
 
@@ -23,13 +26,15 @@ export default function TimeLeftBar({ timeLeft, maximumTime}) {
     }
   });
 
-  // Modifies the width value every time is updated
+  // Modifies the width of bar every time the time left is updated
   useEffect(() => {
     // Options are defined in a way that the bar is reducing constantly
     // 5 is subtracted from the percentage because bar is normally running late.
     // That means that when the time is up, bar is still running towards the end.
-    widthAsPercentage.value = withTiming(convertTimeLeftToPercentage(timeLeft, maximumTime) - 5, {
-      duration: 1000,
+    const newValue = convertTimeLeftToPercentage(timeLeft, maximumTime) - secondAsPercentage;
+    const valueReset = newValue > widthAsPercentage.value;
+    widthAsPercentage.value = withTiming(valueReset ? 100 : newValue, {
+      duration: valueReset ? 0 : 1000,
       easing: Easing.linear,
       reduceMotion: ReduceMotion.Never
     });
@@ -44,16 +49,7 @@ export default function TimeLeftBar({ timeLeft, maximumTime}) {
   return (
     <View style={styles.timeLeftBarContainer}>
       <Animated.View style={[styles.timeLeftBar, animatedStyles]} />
+      { timeLeft === 0 ? <Text style={{ fontWeight: 'bold' }}>Time's up!</Text> : <Text>Time left: {timeLeft}</Text>}
     </View>
   )
 }
-
-const styles = StyleSheet.create({
-  timeLeftBarContainer: {
-    width: '100%',
-    height: 15,
-  },
-  timeLeftBar: {
-    height: '100%',
-  }
-});
