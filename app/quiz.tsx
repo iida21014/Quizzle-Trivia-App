@@ -7,7 +7,7 @@ import { QuestionCard } from './QuestionCard';
 import { TokenContext } from '../TokenContext';
 import TimeLeftBar from './TimeLeftBar';
 import { Audio } from 'expo-av';
-
+import AnimatedText from './AnimatedText';
  
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
@@ -265,20 +265,16 @@ export default function Quiz() {
                 pickedAlternative={pickedAlternative}
                 onPickAlternative={pickAnswer} // Pass the pickAnswer function
                 numberOfQuestions={questions.length}
-              />
-              <Text>Time left: {secondsLeft}</Text>
+              />              
               {showResult && (
-                <View>
-                  <Text style={styles.resultText}>
+                <View style={styles.quizResultContainer}>
+                  <AnimatedText style={styles.quizResultText}>
                     {pickedAlternative === questions[questionIndex].correctAlternative ? "Correct!" : "Incorrect!"}
-                  </Text>
+                  </AnimatedText>
                   {pickedAlternative === questions[questionIndex].correctAlternative && (
-                    <Text>You got {answerPoints} points.</Text>
+                    <AnimatedText style={styles.quizResultText}>You got {answerPoints} points.</AnimatedText>
                   )}
                 </View>
-              )}
-              {showTimeout && (
-                <Text style={{ fontWeight: 'bold' }}>Time's up!</Text>
               )}
             </>
           )}

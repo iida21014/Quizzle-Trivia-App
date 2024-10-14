@@ -109,12 +109,15 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     backgroundColor: 'white',
   },
-
-  quizResultText:{
-    textAlign: 'center',
-    marginBottom: 5,
-  }
-
+  quizResultContainer: {
+    marginTop: 25,
+    alignItems: 'center',
+  },
+  // quizResultTextContainer: {
+  // },
+  quizResultText: {
+    fontWeight: 'bold',
+  },
 });
 
 export default styles;
