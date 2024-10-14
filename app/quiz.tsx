@@ -268,11 +268,11 @@ export default function Quiz() {
               />              
               {showResult && (
                 <View style={styles.quizResultContainer}>
-                  <AnimatedText style={styles.quizResultText}>
+                  <AnimatedText style={styles.animatedText}>
                     {pickedAlternative === questions[questionIndex].correctAlternative ? "Correct!" : "Incorrect!"}
                   </AnimatedText>
                   {pickedAlternative === questions[questionIndex].correctAlternative && (
-                    <AnimatedText style={styles.quizResultText}>You got {answerPoints} points.</AnimatedText>
+                    <AnimatedText style={styles.animatedText}>You got {answerPoints} points.</AnimatedText>
                   )}
                 </View>
               )}

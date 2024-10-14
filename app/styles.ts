@@ -113,9 +113,14 @@ const styles = StyleSheet.create({
     marginTop: 25,
     alignItems: 'center',
   },
-  // quizResultTextContainer: {
-  // },
+
   quizResultText: {
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 5,
+  },
+
+  animatedText: {
     fontWeight: 'bold',
   },
   timeLeftBarContainer: {

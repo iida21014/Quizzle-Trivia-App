@@ -4,7 +4,6 @@ import { useLocalSearchParams, Link } from 'expo-router';
 import styles from './styles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Audio } from 'expo-av';
-import ConfettiCannon from 'react-native-confetti-cannon';
 
 export default function QuizResult() {
   const { totalPoints, categoryId } = useLocalSearchParams();   // Reading game results which have been set by Quiz view when navigating here
@@ -12,7 +11,6 @@ export default function QuizResult() {
   const [username, setUsername] = useState('');
   const [ leaderboardPosition, setLeaderboardPosition ] = useState(null);   // State for showing leaderboard position
   const [ isPersonalRecord, setIsPersonalRecord ] = useState(false)   // State for showing personal record
-  const [showConfetti, setShowConfetti] = useState(false); // State for showing confetti
 
   // Paths to the sound files
   const sounds = {
@@ -57,7 +55,7 @@ export default function QuizResult() {
         if (storedUsername) {
           setUsername(storedUsername); // Set the username if found
         } else {
-          Alert.alert('Error', 'Username not found');
+          Alert.alert('Sorry', "You are not logged in, so we couldn't save your score!");
         }
       } catch (error) {
         console.error('Error fetching username from storage:', error);
@@ -86,7 +84,7 @@ export default function QuizResult() {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`); // Helps catching network errors or incorrect http status codes
+        throw new Error('HTTP error! status: ${response.status}'); // Helps catching network errors or incorrect http status codes
       }
 
       const data = await response.json();
@@ -116,13 +114,10 @@ export default function QuizResult() {
         playSound(sounds.noRecord); // Didn't reach leaderboard
       } else if (isPersonalRecord && leaderboardPosition !== null) {
         playSound(sounds.doubleScore); // Double victory!
-        setShowConfetti(true); // Trigger confetti
       } else if (leaderboardPosition !== null) {
         playSound(sounds.leaderboard); // Leaderboard achievement
-        setShowConfetti(true); // Trigger confetti
       } else if (isPersonalRecord) {
         playSound(sounds.personal); // Personal record but no leaderboard
-        setShowConfetti(true); // Trigger confetti
       }
     }
   }, [leaderboardPosition, isPersonalRecord]); // Only trigger when these states change
@@ -161,16 +156,6 @@ export default function QuizResult() {
         <Text style={styles.quizResultText}>You got {totalPoints} points! 🎯</Text>
        {/* Display the special achievements message */}
        {renderSpecialAchievements()}
-
-       {/* Render confetti cannon when special achievements are met */}
-       {showConfetti && (
-          <ConfettiCannon
-            count={2000}
-            origin={{ x: -10, y: 0 }}
-            fadeOut={true}
-            explosionSpeed={350}
-          />
-        )}
 
         {/* A button for playing a new game */}
         <View style={styles.startButtonContainer}>
