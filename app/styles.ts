@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   input: {
-    width: '100%',
+    width: '95%',
     padding: 10,
     borderWidth: 1,
     borderColor: '#ccc',
