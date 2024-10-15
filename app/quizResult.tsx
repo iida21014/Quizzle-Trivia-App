@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { View, Text, Alert } from 'react-native';
+import { View, Text, Alert, TouchableOpacity} from 'react-native';
 import { useLocalSearchParams, Link } from 'expo-router';
 import styles from './styles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Audio } from 'expo-av';
+import { useRouter } from 'expo-router';
 
 export default function QuizResult() {
   const { totalPoints, categoryId } = useLocalSearchParams();   // Reading game results which have been set by Quiz view when navigating here
@@ -11,6 +12,8 @@ export default function QuizResult() {
   const [username, setUsername] = useState('');
   const [ leaderboardPosition, setLeaderboardPosition ] = useState(null);   // State for showing leaderboard position
   const [ isPersonalRecord, setIsPersonalRecord ] = useState(false)   // State for showing personal record
+  const router = useRouter();  // Initialize router
+
 
   // Paths to the sound files
   const sounds = {
@@ -159,16 +162,21 @@ export default function QuizResult() {
 
         {/* A button for playing a new game */}
         <View style={styles.startButtonContainer}>
-          <View style={styles.button}>
-            <Link
-              style={styles.buttonText}
-              href={{
-                pathname: '/createQuiz',
-              }}>
-                    Play again
-            </Link>
-          </View>
+          <TouchableOpacity 
+          style={styles.button}
+          onPress={() => router.push('/createQuiz')}  // Navigate to Leaderboard screen
+          >
+           <Text style={styles.buttonText}>Play again</Text>
+           </TouchableOpacity>
+           {/* Button for Leaderboard */}
+         <TouchableOpacity 
+          style={styles.button}
+          onPress={() => router.push('/leaderboard')}  // Navigate to Leaderboard screen
+          >
+          <Text style={styles.buttonText}>Leaderboard</Text>
+          </TouchableOpacity>
         </View>
+         
       </View>
     </View>
   );

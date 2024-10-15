@@ -4,11 +4,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage'; // For sto
 import { useNavigation } from '@react-navigation/native'; // For navigation after logout
 import { UserScreenNavigationProp } from './navigationTypes'; // Import the navigation prop type
 import styles from './styles';
+import { useRouter } from 'expo-router';
 
 const UserScreen = () => {
   const [username, setUsername] = useState('');
   const [newUsername, setNewUsername] = useState(''); // State to store the new username
   const navigation = useNavigation<UserScreenNavigationProp>(); // Use the imported type for navigation
+  const router = useRouter();  // Initialize router
 
   // Fetch user data when the component mounts
   useEffect(() => {
@@ -157,15 +159,26 @@ const UserScreen = () => {
         value={newUsername}
         onChangeText={setNewUsername} // Update newUsername state
       />
+
+      {/* Button for Updating username */}
       <TouchableOpacity style={styles.button} onPress={updateUsername}>
         <Text style={styles.buttonText}>Update Username</Text>
       </TouchableOpacity>
 
+      {/* Button for logging out */}
       <TouchableOpacity style={styles.button} onPress={handleLogout}>
         <Text style={styles.buttonText}>Logout</Text>
       </TouchableOpacity>
 
+      {/* Button for Leaderboard */}
+       <TouchableOpacity 
+          style={styles.button}
+          onPress={() => router.push('/leaderboard')}  // Navigate to Leaderboard screen
+          >
+          <Text style={styles.buttonText}>Leaderboard</Text>
+        </TouchableOpacity>
 
+      {/* Button for deleting the account */}
       <TouchableOpacity style={styles.deleteButtonContainer} onPress={deleteUser}>
         <Text style={styles.buttonText}>Delete account</Text>
       </TouchableOpacity>
