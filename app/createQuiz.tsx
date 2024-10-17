@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Link } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';
 import styles from './styles';
+import { Audio } from 'expo-av';
+import { useFocusEffect } from '@react-navigation/native'; // Import useFocusEffect
 
 // This is the form in the beginning of the quiz.
 // You can choose the game difficulty and category.
@@ -29,6 +31,49 @@ export default function CreateQuiz() {
   const [selectedDifficulty, setSelectedDifficulty] = useState('medium');
   // State for number of questions
   const [selectedCategoryId, setSelectedCategoryId] = useState(0);
+
+  let music; // Local variable to store the sound instance
+
+  // Function to play the music
+  const playMusic = async () => {
+    try {
+      console.log('Loading Sound');
+      const { sound: newMusic } = await Audio.Sound.createAsync(
+        require('../assets/sounds/leaderboard.wav')
+      );
+      music = newMusic; // Store the sound instance in the local variable
+      await music.setIsLoopingAsync(true); // Loop the sound
+      console.log('Playing Sound');
+      await music.playAsync(); // Start playing the sound
+    } catch (error) {
+      console.error('Error loading sound:', error);
+    }
+  };
+
+  // Function to stop and unload the music
+  const stopMusic = async () => {
+    if (music) {
+      try {
+        console.log('Stopping and unloading music');
+        await music.stopAsync();    // Stop the sound
+        await music.unloadAsync();  // Unload to free resources
+        music = null;               // Clear the sound reference
+      } catch (error) {
+        console.error('Error stopping/unloading sound:', error);
+      }
+    }
+  };
+
+  // Manage play/stop based on screen focus
+  useFocusEffect(
+    useCallback(() => {
+      playMusic(); // Play music when the screen gains focus
+
+      return () => {
+        stopMusic(); // Stop and unload music when the screen loses focus
+      };
+    }, []) // Empty dependency array ensures effect only runs on focus/blur
+  );
 
   return (
     <View style={styles.container}>

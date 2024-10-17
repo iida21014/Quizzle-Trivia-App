@@ -75,6 +75,7 @@ const LoginScreen = () => {
   
       if (response.ok) {
         await AsyncStorage.setItem('token', data.token); // Store the token securely
+        await AsyncStorage.setItem('username', username); // Store username in AsyncStorage
         Alert.alert('Success', 'Login successful', [
           {
             text: 'OK',
