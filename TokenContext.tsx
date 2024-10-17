@@ -42,10 +42,11 @@ export const TokenProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     console.log('Current token:', token);  // Log token value to the console when it updates
   }, [token]);  // Run this effect whenever `token` state changes
   
+  // Provide the token and regeneration function to the context consumers
+  // Render the children components passed to the provider
   return (
-    // Provide the token and regeneration function to the context consumers
     <TokenContext.Provider value={{ token, regenerateToken }}>
-      {children}  {/* Render the children components passed to the provider */}
+      {children}
     </TokenContext.Provider>
   );
 };
