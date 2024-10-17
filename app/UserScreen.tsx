@@ -141,7 +141,7 @@ const UserScreen = () => {
     try {
       await AsyncStorage.removeItem('token'); // Remove the JWT token
       await AsyncStorage.removeItem('username'); // Remove the username from storage
-      navigation.navigate('LoginScreen'); // Navigate to the login screen
+      navigation.replace('LoginScreen'); // Navigate to the login screen
     } catch (error) {
       console.error('Error logging out:', error);
       Alert.alert('Error', 'Failed to log out');
