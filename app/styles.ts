@@ -131,6 +131,48 @@ const styles = StyleSheet.create({
   timeLeftBar: {
     height: 20,
   },
+
+  tabBar: {
+    backgroundColor: '#f5f5f5',  // Light gray background
+    shadowOpacity: 0,  // Remove shadow
+  },
+  tabBarLabel: {
+    fontSize: 14,  // Label font size
+    fontWeight: 'bold',  // Bold labels
+  },
+  tabBarIndicator: {
+    backgroundColor: '#65558F',  // Color of the underline indicator
+    height: 3,  // Indicator height
+  },
+  tabBarActiveLabel: {
+    color: '#65558F',  // Color of the active tab label
+  },
+  tabBarInactiveLabel: {
+    color: 'gray',  // Color of the inactive tab label
+  },
+
+  row: {
+    flexDirection: 'row',
+    flex: 1,  // Take up full available width
+    alignItems: 'center',  // Center items vertically
+  },
+  rank: {
+    width: 30,  // Fixed width for rank column
+    fontWeight: 'bold',
+  },
+  username: {
+    flex: 1,  // Take up remaining space for the username
+    textAlign: 'left',  // Left align the username
+  },
+  yourUsername: {
+    fontWeight: 'bold',  // Bold the current user's username
+    color: '#65558F',
+  },
+  score: {
+    width: 50,  // Fixed width for the score column
+    textAlign: 'right',  // Align score to the right
+    fontWeight: 'bold',
+  },
 });
 
 export default styles;

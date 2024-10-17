@@ -9,9 +9,6 @@ import { useFocusEffect } from '@react-navigation/native'; // Import useFocusEff
 
 
 const LeaderboardScreen = () => {  
-  const [leaderboard, setLeaderboard] = useState([]);
-  const [loading, setLoading] = useState(true); // For loading state
-  const [error, setError] = useState(null);     // For error handling
   const [selectedCategoryId, setSelectedCategoryId] = useState(0); // State for category
   const [index, setIndex] = useState(0);
   const [routes, setRoutes] = useState([
@@ -128,7 +125,6 @@ useEffect(() => {
       const data = await response.json();
       return data;  // Return the data for individual view
     } catch (error) {
-      setError(error);
       Alert.alert('Error', 'Failed to fetch leaderboard data.');
       return [];
     }
@@ -158,11 +154,21 @@ useEffect(() => {
   // Key handler for FlatList
   const keyHandler = (item, index) => index.toString();
 
-  // Render leaderboard item
   const renderLeaderboard = ({ item, index }) => (
     <View style={styles.leaderboardItem}>
-      <Text>{index + 1}. {item.username}</Text>
-      <Text>{item.score} p</Text>
+      <View style={styles.row}>
+        <Text style={styles.rank}>
+          {index + 1}.
+        </Text>
+  
+        <Text style={[styles.username, item.username === username ? styles.yourUsername : null]}>
+          {item.username}  {/* Username conditionally bold if it matches current user */}
+        </Text>
+  
+        <Text style={styles.score}>
+          {item.score} p 
+        </Text>
+      </View>
     </View>
   );
 
@@ -170,7 +176,7 @@ useEffect(() => {
   const renderLeaderboardView = () => (
     <View style={styles.container}>
       <View style={styles.contentContainerFull}>
-      <Text style={styles.title}>TOP 10 scores</Text>
+      <Text style={styles.title}>🏆 TOP 10 scores 🏆</Text>
       <Text>From the category:</Text>
       <Picker
         selectedValue={selectedCategoryId}
@@ -180,13 +186,14 @@ useEffect(() => {
           <Picker.Item key={id} label={name} value={id} />
         ))}
       </Picker>
+
       
       {loadingView.allUsers ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
         <>
             {leaderboardsView.allUsers.length === 0 ? (
-              <Text style={styles.noScores}>No scores yet</Text>  /* Show this message when there's no data */
+              <Text style={styles.noScores}>No scores yet 😢</Text>  /* Show this message when there's no data */
       ) : (
         <FlatList
           style={styles.leaderboardStyle}
@@ -205,7 +212,7 @@ useEffect(() => {
   const renderUserLeaderboardView = () => (
     <View style={styles.container}>
       <View style={styles.contentContainerFull}>
-      <Text style={styles.title}>Your TOP scores</Text>
+      <Text style={styles.title}>🎉 Your TOP scores 🎉</Text>
       <Text>From the category:</Text>
       <Picker
         selectedValue={selectedCategoryId}
@@ -220,8 +227,8 @@ useEffect(() => {
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
         <>
-            {leaderboardsView.allUsers.length === 0 ? (
-              <Text style={styles.noScores}>No scores yet</Text>  /* Show this message when there's no data */
+            {leaderboardsView.currentUser.length === 0 ? (
+              <Text style={styles.noScores}>No scores yet 😢</Text>  /* Show this message when there's no data */
       ) : (
         <FlatList
           style={styles.leaderboardStyle}
@@ -248,8 +255,15 @@ useEffect(() => {
       renderScene={renderScene}
       onIndexChange={setIndex}
       initialLayout={{ width: '100%' }}
-      renderTabBar={props => <TabBar {...props} />}
+      renderTabBar={props => <TabBar {...props}      
+      style={styles.tabBar}  // Apply the TabBar background style
+      labelStyle={styles.tabBarLabel}  // Apply the TabBar label style
+      activeColor={styles.tabBarActiveLabel.color}  // Apply the active label color
+      inactiveColor={styles.tabBarInactiveLabel.color}  // Apply the inactive label color
+      indicatorStyle={styles.tabBarIndicator}  // Apply the indicator style 
+      />}
     />
+    
   );
 }
 
