@@ -1,45 +1,67 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import styles from './styles';
 import { View, Text, FlatList, ActivityIndicator, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Audio } from 'expo-av';
+import { useFocusEffect } from '@react-navigation/native'; // Import useFocusEffect
 
 
 const LeaderboardScreen = () => {  
-  const [sound, setSound] = useState();
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true); // For loading state
   const [error, setError] = useState(null);     // For error handling
   const [selectedCategoryId, setSelectedCategoryId] = useState(0); // State for category
   const [index, setIndex] = useState(0);
-  const [routes] = useState([
-    { key: 'allUsers', title: 'All' },
-    { key: 'currentUser', title: 'You' },
-  ]);
+  const [routes, setRoutes] = useState([
+    { key: 'allUsers', title: 'All' }, // Start with only the "All" tab
+  ]);  // Use state for dynamic routes
 
-    // // Function to play the sound
-    // async function playSound() {
-    //   console.log('Loading Sound');
-    //   const { sound } = await Audio.Sound.createAsync(
-    //      require('./assets/sounds.mp3')  // or a remote URL
-    //   );
-    //   setSound(sound);
-  
-    //   console.log('Playing Sound');
-    //   await sound.playAsync(); 
-    // }
-  
-    // // Unload sound to free up memory when component unmounts
-    // React.useEffect(() => {
-    //   return sound
-    //     ? () => {
-    //         console.log('Unloading Sound');
-    //         sound.unloadAsync();
-    //       }
-    //     : undefined;
-    // }, [sound]);
+  let music; // Local variable to store the sound instance
+
+  // Function to play the music
+  const playMusic = async () => {
+    try {
+      console.log('Loading Sound');
+      const { sound: newMusic } = await Audio.Sound.createAsync(
+        require('../assets/sounds/leaderboard.wav')
+      );
+      music = newMusic; // Store the sound instance in the local variable
+      await music.setIsLoopingAsync(true); // Loop the sound
+      console.log('Playing Sound');
+      await music.playAsync(); // Start playing the sound
+    } catch (error) {
+      console.error('Error loading sound:', error);
+    }
+  };
+
+  // Function to stop and unload the music
+  const stopMusic = async () => {
+    if (music) {
+      try {
+        console.log('Stopping and unloading music');
+        await music.stopAsync();    // Stop the sound
+        await music.unloadAsync();  // Unload to free resources
+        music = null;               // Clear the sound reference
+      } catch (error) {
+        console.error('Error stopping/unloading sound:', error);
+      }
+    }
+  };
+
+  // Manage play/stop based on screen focus
+  useFocusEffect(
+    useCallback(() => {
+      playMusic(); // Play music when the screen gains focus
+
+      return () => {
+        stopMusic(); // Stop and unload music when the screen loses focus
+      };
+    }, []) // Empty dependency array ensures effect only runs on focus/blur
+  );
+
+
 
   const [leaderboardsView, setLeaderboardsView] = useState({
     allUsers: [],
@@ -53,24 +75,30 @@ const LeaderboardScreen = () => {
 
   const [username, setUsername] = useState('');
 
-  // Fetch the username from AsyncStorage when the component mounts
-  useEffect(() => {
-    const getUsername = async () => {
-      try {
-        const storedUsername = await AsyncStorage.getItem('username'); // Retrieve username from storage
-        if (storedUsername) {
-          setUsername(storedUsername); // Set the username if found
-        } else {
-          Alert.alert('Error', 'Username not found');
-        }
-      } catch (error) {
-        console.error('Error fetching username from storage:', error);
-        Alert.alert('Error', 'An error occurred while fetching the username');
-      }
-    };
+// Fetch the username from AsyncStorage when the component mounts
+useEffect(() => {
+  const getUsername = async () => {
+    try {
+      const storedUsername = await AsyncStorage.getItem('username'); // Retrieve username from storage
+      if (storedUsername) {
+        setUsername(storedUsername); // Set the username if found
 
-    getUsername();
-  }, []); // Empty dependency array to ensure it runs once when the component mounts
+        // Add the "You" tab when a user is logged in
+        setRoutes([
+          { key: 'allUsers', title: 'All' },
+          { key: 'currentUser', title: 'You' }
+        ]);
+      } else {
+        Alert.alert('Login', 'Login to see your personal scores');
+      }
+    } catch (error) {
+      console.error('Error fetching username from storage:', error);
+      Alert.alert('Error', 'An error occurred while fetching the username');
+    }
+  };
+
+  getUsername();
+}, []); // Empty dependency array to ensure it runs once when the component mounts
 
 
   const categories = [

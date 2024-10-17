@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { View, Text } from 'react-native';
 import { decode } from 'he';
@@ -8,6 +8,7 @@ import { TokenContext } from '../TokenContext';
 import TimeLeftBar from './TimeLeftBar';
 import { Audio } from 'expo-av';
 import AnimatedText from './AnimatedText';
+import { useFocusEffect } from '@react-navigation/native'; // Import useFocusEffect
  
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
@@ -64,26 +65,53 @@ export default function Quiz() {
   const [questions, setQuestions] = useState([]);
   const [pickedAlternative, setAlternative] = useState(null);
   const [showResult, setShowResult] = useState(false); // State to show result of answer
-  const [music, setMusic] = useState();
   const [sound, setSound] = useState();
-  
-  async function playMusic() {
-    console.log('Loading music');
-    const { sound } = await Audio.Sound.createAsync(require('../assets/sounds/gameMusic.wav'));
-    setMusic(sound);
-    await sound.setIsLoopingAsync(true);
-    console.log('Playing music');
-    await sound.playAsync();
-  };
 
-  // Function to stop the music
-  async function stopMusic() {
-    if (music) {
-      console.log('Stopping music');
-      await music.stopAsync();  // Stop the music
-      setMusic(null);  // Clear the music state
+  let music; // Local variable to store the sound instance
+
+  // Function to play the music
+  const playMusic = async () => {
+    try {
+      console.log('Loading Sound');
+      const { sound: newMusic } = await Audio.Sound.createAsync(
+        require('../assets/sounds/gameMusic.wav')
+      );
+      music = newMusic; // Store the sound instance in the local variable
+      await music.setIsLoopingAsync(true); // Loop the sound
+      console.log('Playing Sound');
+      await music.playAsync(); // Start playing the sound
+    } catch (error) {
+      console.error('Error loading sound:', error);
     }
   };
+
+  // Function to stop and unload the music
+  const stopMusic = async () => {
+    if (music) {
+      try {
+        console.log('Stopping and unloading music');
+        await music.stopAsync();    // Stop the sound
+        await music.unloadAsync();  // Unload to free resources
+        music = null;               // Clear the sound reference
+      } catch (error) {
+        console.error('Error stopping/unloading sound:', error);
+      }
+    }
+  };
+
+  // Manage play/stop based on screen focus
+  useFocusEffect(
+    useCallback(() => {
+      playMusic(); // Play music when the screen gains focus
+
+      return () => {
+        stopMusic(); // Stop and unload music when the screen loses focus
+      };
+    }, []) // Empty dependency array ensures effect only runs on focus/blur
+  );
+
+
+
   
 
   // Function to play sound effects
@@ -110,7 +138,6 @@ export default function Quiz() {
         setQuestionIndex((prevIndex) => prevIndex + 1);
       } else {
 
-        stopMusic();
 
         // Navigating to result page and passing category and points as parameters
         router.replace({
@@ -132,7 +159,6 @@ export default function Quiz() {
   }
 
   async function generateQuiz() {
-    playMusic();
     if (!token) {
       console.error('No token available. Please generate a token first.');
       return;
