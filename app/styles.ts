@@ -118,6 +118,12 @@ const styles = StyleSheet.create({
   animatedText: {
     fontWeight: 'bold',
   },
+  correctAnswersInARowText: {
+    color: '#ff8c00',
+    marginTop: 15,
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
   timeLeftBarContainer: {
     width: '100%',
     marginBottom: 20,

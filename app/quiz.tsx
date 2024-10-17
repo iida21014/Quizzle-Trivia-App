@@ -17,6 +17,7 @@ function shuffleArray(array) {
   return array;
 }
 
+const bonusLimit = 2;
 const maximumTimeToAnswerInMilliseconds = 20000;
 const maxPointsForAnswer = {
   easy: 700,
@@ -57,6 +58,7 @@ export default function Quiz() {
   const [secondsLeft, setSecondsLeft] = useState(getInitialAnswerTimeInSeconds());
   const [playerPoints, setPlayerPoints] = useState(0); // State to have the points player has got
   const [answerPoints, setAnswerPoints] = useState(0); // State to have the points had from the current question
+  const [correctAnswersInARow, setCorrectAnswersInARow] = useState(0);
   const [questionAskedAt, setQuestionAskedAt] = useState(new Date());
   const [questionIndex, setQuestionIndex] = useState(0);
   const [questions, setQuestions] = useState([]);
@@ -235,11 +237,22 @@ export default function Quiz() {
 
     if (isAnswerCorrect) {
       playSound(sounds.correct);
-      const answerPoints = calculatePoints(answerTimeInMilliSeconds, questions[questionIndex].difficulty);
-      setAnswerPoints(answerPoints);
+
+      // If there are enough correct answers in a row, adding extra points
+      const currentCorrectAnswersInARow = correctAnswersInARow + 1;
+      let extraPoints = 0;
+      if (currentCorrectAnswersInARow >= bonusLimit) {
+        extraPoints += currentCorrectAnswersInARow * 100
+      }
+
+      const answerPoints = calculatePoints(answerTimeInMilliSeconds, questions[questionIndex].difficulty) + extraPoints;
+      setAnswerPoints(answerPoints);      
+      
+      setCorrectAnswersInARow(oldValue => oldValue + 1);
       setPlayerPoints(currentPoints => currentPoints + answerPoints);
     }
     else {
+      setCorrectAnswersInARow(0);
       playSound(sounds.incorrect);
     };
     
@@ -270,6 +283,7 @@ export default function Quiz() {
                   {pickedAlternative === questions[questionIndex].correctAlternative && (
                     <AnimatedText style={styles.animatedText}>You got {answerPoints} points.</AnimatedText>
                   )}
+                  {correctAnswersInARow >= bonusLimit && <AnimatedText style={styles.correctAnswersInARowText}>🎉 {correctAnswersInARow} answers in a row! 🎉</AnimatedText>}
                 </View>
               )}
             </>
