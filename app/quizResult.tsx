@@ -14,7 +14,6 @@ export default function QuizResult() {
   const [ isPersonalRecord, setIsPersonalRecord ] = useState(false)   // State for showing personal record
   const router = useRouter();  // Initialize router
 
-
   // Paths to the sound files
   const sounds = {
     doubleScore: require('../assets/sounds/doubleScore.wav'),
@@ -39,7 +38,7 @@ export default function QuizResult() {
   }
 
   // Cleanup function to unload the sound when the component unmounts
-   useEffect(() => {
+  useEffect(() => {
     return sound
       ? () => {
           console.log('Unloading sound');
@@ -47,8 +46,6 @@ export default function QuizResult() {
         }
       : undefined;
   }, [sound]);
-
-
 
   // Fetch the username from AsyncStorage when the component mounts
   useEffect(() => {
@@ -68,8 +65,6 @@ export default function QuizResult() {
 
     getUsername();
   }, []); // Empty dependency array to ensure it runs once when the component mounts
-
-
 
   // Sends user points to backend and sets leaderboard results to the UI
   async function postPlayerPoints(username, score, category, ) {
@@ -101,12 +96,12 @@ export default function QuizResult() {
   }
 
   // When view initializes, sending game results to backend
-    useEffect(() => {
-      if (username && totalPoints && categoryId) {
-        console.log('username:', username, 'totalPoints:', totalPoints, 'categoryId:', categoryId); // This is for debugging
-        postPlayerPoints(username,totalPoints, categoryId);
-      }
-    }, [username, totalPoints, categoryId]); // Only run when username is fetched and totalPoints/categoryId are valid
+  useEffect(() => {
+    if (username && totalPoints && categoryId) {
+      console.log('username:', username, 'totalPoints:', totalPoints, 'categoryId:', categoryId); // This is for debugging
+      postPlayerPoints(username,totalPoints, categoryId);
+    }
+  }, [username, totalPoints, categoryId]); // Only run when username is fetched and totalPoints/categoryId are valid
 
 
   // Play sounds based on leaderboard position and personal record
@@ -134,7 +129,6 @@ export default function QuizResult() {
 
     if (leaderboardPosition !== null && isPersonalRecord) {
       return (
-
         <Text style={styles.quizResultText}>🏆 Double victory! 🏆{"\n"}You've set a new personal record and reached leaderboard position {leaderboardPosition}!{"\n"}Keep up the amazing work! 🎉</Text>
       );
     }
@@ -150,30 +144,31 @@ export default function QuizResult() {
     return null;
   };
 
-
   return (
     <View style={styles.container}>
       <View style={styles.contentContainerFull}>
         <Text style={styles.title}>Game ended</Text>
 
         <Text style={styles.quizResultText}>You got {totalPoints} points! 🎯</Text>
-       {/* Display the special achievements message */}
-       {renderSpecialAchievements()}
+        {/* Display the special achievements message */}
+        {renderSpecialAchievements()}
 
-        {/* A button for playing a new game */}
+        
         <View style={styles.startButtonContainer}>
+          {/* A button for playing a new game */}
           <TouchableOpacity 
-          style={styles.button}
-          onPress={() => router.push('/createQuiz')}  // Navigate to Leaderboard screen
+            style={styles.button}
+            onPress={() => router.push('/createQuiz')}  // Navigate to create quiz
           >
-           <Text style={styles.buttonText}>Play again</Text>
-           </TouchableOpacity>
-           {/* Button for Leaderboard */}
-         <TouchableOpacity 
-          style={styles.button}
-          onPress={() => router.push('/leaderboard')}  // Navigate to Leaderboard screen
+            <Text style={styles.buttonText}>Play again</Text>
+          </TouchableOpacity>
+        
+          {/* Button for Leaderboard */}
+          <TouchableOpacity 
+            style={styles.button}
+            onPress={() => router.push('/leaderboard')}  // Navigate to Leaderboard screen
           >
-          <Text style={styles.buttonText}>Leaderboard</Text>
+            <Text style={styles.buttonText}>Leaderboard</Text>
           </TouchableOpacity>
         </View>
          

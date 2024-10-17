@@ -18,7 +18,6 @@ function shuffleArray(array) {
 }
 
 const maximumTimeToAnswerInMilliseconds = 20000;
-
 const maxPointsForAnswer = {
   easy: 700,
   medium: 850,
@@ -63,7 +62,6 @@ export default function Quiz() {
   const [questions, setQuestions] = useState([]);
   const [pickedAlternative, setAlternative] = useState(null);
   const [showResult, setShowResult] = useState(false); // State to show result of answer
-  const [showTimeout, setShowTimeout] = useState(false); // State to show the timeout message
   const [music, setMusic] = useState();
   const [sound, setSound] = useState();
   
@@ -76,17 +74,17 @@ export default function Quiz() {
     await sound.playAsync();
   };
 
-    // Function to stop the music
-    async function stopMusic() {
-      if (music) {
-        console.log('Stopping music');
-        await music.stopAsync();  // Stop the music
-        setMusic(null);  // Clear the music state
-      }
-    };
+  // Function to stop the music
+  async function stopMusic() {
+    if (music) {
+      console.log('Stopping music');
+      await music.stopAsync();  // Stop the music
+      setMusic(null);  // Clear the music state
+    }
+  };
   
 
-      // Function to play sound effects
+  // Function to play sound effects
   async function playSound(soundFile) {
     console.log('Loading sound:', soundFile);
     const { sound } = await Audio.Sound.createAsync(soundFile);
@@ -127,7 +125,6 @@ export default function Quiz() {
       setSecondsLeft(getInitialAnswerTimeInSeconds());
       setAlternative(null);
       setShowResult(false);
-      setShowTimeout(false);
       setQuestionAskedAt(new Date());
     }, 2000); // Show result for 2 second before proceeding to the next question
   }
@@ -208,7 +205,6 @@ export default function Quiz() {
 
       // Show the correct answer to the player (and also disable the UI for a few seconds)
       setAlternative(questions[questionIndex].correctAlternative);
-      setShowTimeout(true);
       moveOnToNextQuestion();
 
       // After timeout there is no need to run this code anymore.
@@ -243,7 +239,7 @@ export default function Quiz() {
       setAnswerPoints(answerPoints);
       setPlayerPoints(currentPoints => currentPoints + answerPoints);
     }
-    else{
+    else {
       playSound(sounds.incorrect);
     };
     

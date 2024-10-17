@@ -78,12 +78,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,     // Adds a bottom border to separate items
     borderBottomColor: '#ccc',// Light gray border color
   },
-
   leaderboardStyle:{
     flex: 1,
     // flexGrow: 0,    // Prevents FlatList from expanding vertically
   },
-
   picker: {
     marginBottom: 5,
   },
@@ -91,7 +89,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     alignItems: 'center',
   },
-
   noScores:{
     textAlign: 'center'
 
@@ -113,13 +110,11 @@ const styles = StyleSheet.create({
     marginTop: 25,
     alignItems: 'center',
   },
-
   quizResultText: {
     fontWeight: 'bold',
     textAlign: 'center',
     marginTop: 5,
   },
-
   animatedText: {
     fontWeight: 'bold',
   },
