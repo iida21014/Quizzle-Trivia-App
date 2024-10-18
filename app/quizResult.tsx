@@ -126,6 +126,13 @@ export default function QuizResult() {
   // Returns UI element which shows leaderboard-related information
   // Renders both leaderboard and personal record conditions
   const renderSpecialAchievements = () => {
+    if (isPersonalRecord && leaderboardPosition === -1) {
+      return (
+        <Text style={styles.quizResultText}>
+          🔥 It's a new personal record! 🔥{"\n"}Keep going!
+        </Text>
+      );
+    }
     if (leaderboardPosition === -1) {
       return <Text style={styles.quizResultText}>😞 Sorry! 😞{"\n"}You didn't reach the leaderboard this time.</Text>;
     }
@@ -140,9 +147,6 @@ export default function QuizResult() {
       return <Text style={styles.quizResultText}>🎉 Congratulations! 🎉{"\n"}You've reached leaderboard position {leaderboardPosition}!</Text>;
     }
 
-    if (isPersonalRecord) {
-      return <Text style={styles.quizResultText}>🔥 It's a new personal record! 🔥{"\n"}Keep going!</Text>;
-    }
 
     return null;
   };
@@ -159,12 +163,15 @@ export default function QuizResult() {
         <View style={styles.startButtonContainer}>
         {/* Conditionally render login button if not logged in */}
         {!isLoggedIn && (
+          <View>
+           <Text style={styles.quizResultText}>Login to save your next score!</Text>
           <TouchableOpacity
             style={styles.button}
             onPress={() => router.push('/LoginScreen')}  // Navigate to Login screen
           >
             <Text style={styles.buttonText}>Login</Text>
           </TouchableOpacity>
+          </View>
         )}
         
         
