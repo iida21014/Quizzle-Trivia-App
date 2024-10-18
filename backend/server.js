@@ -190,24 +190,47 @@ app.put('/update-username', authenticateToken, async (req, res) => {
 });
 
 
-// DELETE /delete-user - Delete a user account (protected route)
+// DELETE /delete-user - Delete a user account and their leaderboard entries (protected route)
 app.delete('/delete-user', authenticateToken, async (req, res) => {
+  const session = client.startSession(); // Start a session for the transaction
+
   try {
     const userId = req.user.userId;  // Extract userId from the decoded token
+    const username = req.user.username; // Extract username from the decoded token
 
-    // Delete the user from the collection by ID
-    const result = await usersCollection.deleteOne({ _id: new ObjectId(userId) });
+    session.startTransaction(); // Begin the transaction
 
-    if (result.deletedCount === 1) {
-      res.status(200).json({ message: 'User account deleted successfully' });
-    } else {
-      res.status(404).json({ error: 'User not found' });
+    // Delete the user from the Users collection by ID
+    const deleteUserResult = await usersCollection.deleteOne({ _id: new ObjectId(userId) }, { session });
+
+    if (deleteUserResult.deletedCount === 0) {
+      // If user was not found, abort the transaction
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ error: 'User not found' });
     }
+
+    // Delete the user's entries from the Leaderboard collection based on username
+    const deleteLeaderboardResult = await itemsCollection.deleteMany({ username: username }, { session });
+
+    // Commit the transaction if both operations are successful
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(200).json({
+      message: 'User account and leaderboard entries deleted successfully',
+      leaderboardDeleted: deleteLeaderboardResult.deletedCount // Number of leaderboard entries deleted
+    });
   } catch (error) {
-    console.error('Error deleting user:', error);
+    // If any error occurs, abort the transaction
+    await session.abortTransaction();
+    session.endSession();
+    console.error('Error deleting user and leaderboard entries:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+
 
 // GET /items - Fetch all items from the Leaderboard collection
 app.get('/items', async (req, res) => {
