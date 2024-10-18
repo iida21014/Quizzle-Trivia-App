@@ -124,7 +124,7 @@ app.get('/protected', authenticateToken, async (req, res) => {
   }
 });
 
-// PUT /update-username - Update a user's username (protected route)
+// PUT /update-username - Update a user's username in both Users and Leaderboard collections (protected route)
 app.put('/update-username', authenticateToken, async (req, res) => {
   const { username } = req.body;  // Extract new username from the request body
 
@@ -136,28 +136,59 @@ app.put('/update-username', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.userId;  // Get the user ID from the decoded token
 
-    // Check if the new username already exists
+    // Check if the new username already exists in the Users collection
     const existingUser = await usersCollection.findOne({ username });
     if (existingUser) {
       return res.status(400).json({ error: 'Username already exists.' });
     }
 
-    // Update the username in the database
-    const result = await usersCollection.updateOne(
-      { _id: new ObjectId(userId) },  // Find the user by ID
-      { $set: { username } }          // Set the new username
-    );
+    // Start a session to handle multiple database operations as a transaction
+    const session = client.startSession();
+    session.startTransaction();
 
-    if (result.modifiedCount === 0) {
-      return res.status(404).json({ error: 'User not found or username was not updated.' });
+    try {
+      // Update the username in the Users collection
+      const updateUserResult = await usersCollection.updateOne(
+        { _id: new ObjectId(userId) },  // Find the user by ID
+        { $set: { username } },  // Set the new username
+        { session }  // Use the session for this operation
+      );
+
+      if (updateUserResult.modifiedCount === 0) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(404).json({ error: 'User not found or username was not updated.' });
+      }
+
+      // Update the username in the Leaderboard collection for all entries related to the user
+      const updateLeaderboardResult = await itemsCollection.updateMany(
+        { username: req.user.username },  // Find leaderboard entries with the old username
+        { $set: { username } },  // Set the new username
+        { session }  // Use the session for this operation
+      );
+
+      // Commit the transaction
+      await session.commitTransaction();
+      session.endSession();
+
+      res.json({
+        message: 'Username updated successfully in both Users and Leaderboard collections',
+        user: { username },
+        leaderboardUpdated: updateLeaderboardResult.modifiedCount
+      });
+    } catch (error) {
+      // If any operation fails, abort the transaction
+      await session.abortTransaction();
+      session.endSession();
+      console.error('Transaction failed:', error);
+      res.status(500).send('Error updating username in Users and Leaderboard collections');
     }
-
-    res.json({ message: 'Username updated successfully', user: { username } });  // Return success message
   } catch (error) {
     console.error('Error updating username:', error);
     res.status(500).send('Error updating username');
   }
 });
+
 
 // DELETE /delete-user - Delete a user account (protected route)
 app.delete('/delete-user', authenticateToken, async (req, res) => {
