@@ -10,6 +10,7 @@ export default function QuizResult() {
   const { totalPoints, categoryId } = useLocalSearchParams();   // Reading game results which have been set by Quiz view when navigating here
   const [sound, setSound] = useState(null);
   const [username, setUsername] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);  // State for checking if logged in
   const [ leaderboardPosition, setLeaderboardPosition ] = useState(null);   // State for showing leaderboard position
   const [ isPersonalRecord, setIsPersonalRecord ] = useState(false)   // State for showing personal record
   const router = useRouter();  // Initialize router
@@ -54,8 +55,10 @@ export default function QuizResult() {
         const storedUsername = await AsyncStorage.getItem('username'); // Retrieve username from storage
         if (storedUsername) {
           setUsername(storedUsername); // Set the username if found
+          setIsLoggedIn(true);  // Mark as logged in
         } else {
           Alert.alert('Sorry', "You are not logged in, so we couldn't save your score!");
+          setIsLoggedIn(false);  // Not logged in
         }
       } catch (error) {
         console.error('Error fetching username from storage:', error);
@@ -153,8 +156,18 @@ export default function QuizResult() {
         {/* Display the special achievements message */}
         {renderSpecialAchievements()}
 
-        
         <View style={styles.startButtonContainer}>
+        {/* Conditionally render login button if not logged in */}
+        {!isLoggedIn && (
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => router.push('/LoginScreen')}  // Navigate to Login screen
+          >
+            <Text style={styles.buttonText}>Login</Text>
+          </TouchableOpacity>
+        )}
+        
+        
           {/* A button for playing a new game */}
           <TouchableOpacity 
             style={styles.button}
