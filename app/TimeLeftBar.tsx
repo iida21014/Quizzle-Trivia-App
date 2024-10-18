@@ -49,7 +49,7 @@ export default function TimeLeftBar({ timeLeft, maximumTime }) {
   return (
     <View style={styles.timeLeftBarContainer}>
       <Animated.View style={[styles.timeLeftBar, animatedStyles]} />
-      { timeLeft === 0 ? <Text style={{ fontWeight: 'bold' }}>Time's up!</Text> : <Text>Time left: {timeLeft}</Text>}
+      { timeLeft === 0 ? <Text style={{ fontWeight: 'bold', fontSize:12 }}>Time's up!</Text> : <Text style={{fontSize:12}}>Time left: {timeLeft}</Text>}
     </View>
   )
 }

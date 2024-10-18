@@ -8,11 +8,11 @@ export function QuestionCard({ questionData, questionIndex, pickedAlternative, o
   function getAlternativeStyle(alternative) {
     // When answer is not picked, app uses default styling
     if (pickedAlternative == null) {
-      return cardStyles.questionAlternative;
+      return styles.questionAlternative;
     }
 
     // Making a copy of base style and modifying the copy if needed
-    const cardStyle = { ...cardStyles.questionAlternative };
+    const cardStyle = { ...styles.questionAlternative };
 
     if (alternative === correctAlternative) {
       // If alternative is the correct one, using green background
@@ -29,7 +29,7 @@ export function QuestionCard({ questionData, questionIndex, pickedAlternative, o
 
   return (
     <View>
-      <Text style={styles.title}>Question {questionIndex + 1} / {numberOfQuestions}:</Text>
+      <Text style={styles.titleQuestion}>Question {questionIndex + 1} / {numberOfQuestions}:</Text>
       <Text style={{ ...styles.title2, textAlign: 'center'}}>{question}</Text>
 
       {/* Rendering alternatives of a question */}
@@ -40,24 +40,9 @@ export function QuestionCard({ questionData, questionIndex, pickedAlternative, o
           style={getAlternativeStyle(alternative)}
           onPress={() => onPickAlternative(alternative)}
         >
-          <Text style={cardStyles.questionAlternativeText}>{alternative}</Text>
+          <Text style={styles.questionAlternativeText}>{alternative}</Text>
         </Pressable>
       ))}
     </View>
   );
 }
-
-const cardStyles = StyleSheet.create({
-  questionAlternative: {
-    borderColor: 'black',
-    borderWidth: 1,
-    padding: 5,
-    marginBottom: 10,
-    backgroundColor: '#e7e2f2',
-  },
-  questionAlternativeText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  }
-});

@@ -5,12 +5,12 @@ export default function AnimatedText({ children, style = {} }) {
   const textSize = useSharedValue(getFontSize());
 
   function getFontSize() {
-    return style.fontSize || 16; // Default font size is 16
+    return style.fontSize || 14; // Default font size is 14
   }
 
   useEffect(() => {
-    // Increases/decreases font size by 3 back and forth
-    textSize.value = withRepeat(withTiming(getFontSize() + 3, { duration: 400 }), 0, true);
+    // Increases/decreases font size by 2 back and forth
+    textSize.value = withRepeat(withTiming(getFontSize() + 1, { duration: 400 }), 0, true);
   }, []);
 
   const animatedStyle = useAnimatedStyle(() => ({
