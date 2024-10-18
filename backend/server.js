@@ -126,19 +126,28 @@ app.get('/protected', authenticateToken, async (req, res) => {
 
 // PUT /update-username - Update a user's username in both Users and Leaderboard collections (protected route)
 app.put('/update-username', authenticateToken, async (req, res) => {
-  const { username } = req.body;  // Extract new username from the request body
+  const { username: newUsername } = req.body; // Extract new username from the request body
 
   // Validate the new username length
-  if (!username || username.length < 3) {
+  if (!newUsername || newUsername.length < 3) {
     return res.status(400).json({ error: 'Username must be at least 3 characters long.' });
   }
 
   try {
     const userId = req.user.userId;  // Get the user ID from the decoded token
 
+    // Fetch the existing user
+    const existingUser = await usersCollection.findOne({ _id: new ObjectId(userId) });
+    const currentUsername = existingUser.username; // Get the current username
+
+    // Check if the new username is the same as the current username
+    if (currentUsername === newUsername) {
+      return res.status(400).json({ error: 'New username is the same as the current username.' });
+    }
+
     // Check if the new username already exists in the Users collection
-    const existingUser = await usersCollection.findOne({ username });
-    if (existingUser) {
+    const usernameExists = await usersCollection.findOne({ username: newUsername });
+    if (usernameExists) {
       return res.status(400).json({ error: 'Username already exists.' });
     }
 
@@ -149,9 +158,9 @@ app.put('/update-username', authenticateToken, async (req, res) => {
     try {
       // Update the username in the Users collection
       const updateUserResult = await usersCollection.updateOne(
-        { _id: new ObjectId(userId) },  // Find the user by ID
-        { $set: { username } },  // Set the new username
-        { session }  // Use the session for this operation
+        { _id: new ObjectId(userId) },
+        { $set: { username: newUsername } },
+        { session }
       );
 
       if (updateUserResult.modifiedCount === 0) {
@@ -160,11 +169,11 @@ app.put('/update-username', authenticateToken, async (req, res) => {
         return res.status(404).json({ error: 'User not found or username was not updated.' });
       }
 
-      // Update the username in the Leaderboard collection for all entries related to the user
+      // Update the username in the Leaderboard collection based on username
       const updateLeaderboardResult = await itemsCollection.updateMany(
-        { username: req.user.username },  // Find leaderboard entries with the old username
-        { $set: { username } },  // Set the new username
-        { session }  // Use the session for this operation
+        { username: currentUsername },  // Use current username to find leaderboard entries
+        { $set: { username: newUsername } },  // Set the new username
+        { session }
       );
 
       // Commit the transaction
@@ -173,7 +182,7 @@ app.put('/update-username', authenticateToken, async (req, res) => {
 
       res.json({
         message: 'Username updated successfully in both Users and Leaderboard collections',
-        user: { username },
+        user: { username: newUsername },
         leaderboardUpdated: updateLeaderboardResult.modifiedCount
       });
     } catch (error) {
@@ -181,14 +190,13 @@ app.put('/update-username', authenticateToken, async (req, res) => {
       await session.abortTransaction();
       session.endSession();
       console.error('Transaction failed:', error);
-      res.status(500).send('Error updating username in Users and Leaderboard collections');
+      res.status(500).json({ error: 'Error updating username in Users and Leaderboard collections' });
     }
   } catch (error) {
     console.error('Error updating username:', error);
-    res.status(500).send('Error updating username');
+    res.status(500).json({ error: 'Error updating username' });
   }
 });
-
 
 // DELETE /delete-user - Delete a user account and their leaderboard entries (protected route)
 app.delete('/delete-user', authenticateToken, async (req, res) => {
@@ -196,7 +204,14 @@ app.delete('/delete-user', authenticateToken, async (req, res) => {
 
   try {
     const userId = req.user.userId;  // Extract userId from the decoded token
-    const username = req.user.username; // Extract username from the decoded token
+
+    // Fetch the user to get the username
+    const existingUser = await usersCollection.findOne({ _id: new ObjectId(userId) });
+    if (!existingUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const username = existingUser.username; // Get the username
 
     session.startTransaction(); // Begin the transaction
 
@@ -229,6 +244,7 @@ app.delete('/delete-user', authenticateToken, async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 
 
