@@ -10,21 +10,33 @@ export function QuestionCard({ questionData, questionIndex, pickedAlternative, o
     if (pickedAlternative == null) {
       return styles.questionAlternative;
     }
-
     // Making a copy of base style and modifying the copy if needed
     const cardStyle = { ...styles.questionAlternative };
-
     if (alternative === correctAlternative) {
       // If alternative is the correct one, using green background
       cardStyle.backgroundColor = 'green';
-      
     } else if (alternative === pickedAlternative && alternative !== correctAlternative) {
       // If alternative is picked one and not the correct one, using red.
-      cardStyle.backgroundColor = 'red';
-      
+      cardStyle.backgroundColor = 'darkred';
     }
-
     return cardStyle;
+  }
+
+    // Function which changes text colour in right and wrong alternatives
+  function getAlternativeTextStyle(alternative) {
+    // When answer is not picked, app uses default styling
+    if (pickedAlternative == null) {
+      return styles.questionAlternativeText;
+    }
+    // Making a copy of base style and modifying the copy if needed
+    const alternativeText = {...styles.questionAlternativeText};
+    if (alternative === correctAlternative) {
+      alternativeText.color ='white';
+      
+    } else if (alternative === pickedAlternative && alternative !== correctAlternative) {
+      alternativeText.color ='white';
+    }
+    return alternativeText;
   }
 
   return (
@@ -40,7 +52,7 @@ export function QuestionCard({ questionData, questionIndex, pickedAlternative, o
           style={getAlternativeStyle(alternative)}
           onPress={() => onPickAlternative(alternative)}
         >
-          <Text style={styles.questionAlternativeText}>{alternative}</Text>
+          <Text style={getAlternativeTextStyle(alternative)}>{alternative}</Text>
         </Pressable>
       ))}
     </View>

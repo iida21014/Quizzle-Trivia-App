@@ -122,6 +122,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     textAlign: 'center',
+    color: 'black',
   }, 
 
   quizResultContainer: {
