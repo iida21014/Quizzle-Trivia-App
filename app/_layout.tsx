@@ -1,5 +1,6 @@
 import { Stack } from 'expo-router';
-import { TokenProvider } from '../TokenContext';
+import { TokenProvider } from './TokenContext';
+
 export default function RootLayout() {
   return (
     <TokenProvider>

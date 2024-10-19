@@ -4,7 +4,7 @@ import { View, Text } from 'react-native';
 import { decode } from 'he';
 import styles from './styles';
 import { QuestionCard } from './QuestionCard';
-import { TokenContext } from '../TokenContext';
+import { TokenContext } from './TokenContext';
 import TimeLeftBar from './TimeLeftBar';
 import { Audio } from 'expo-av';
 import AnimatedText from './AnimatedText';
