@@ -136,6 +136,13 @@ const LoginScreen = () => {
           </Text>
         </TouchableOpacity>
       )}
+      <Text>Don't have an account?</Text>
+      <TouchableOpacity
+        style={styles.button} // Add styles for this button
+        onPress={() => navigation.replace('RegisterScreen')} // Navigate to the Register Screen
+      >
+        <Text style={styles.buttonText}>Register</Text>
+      </TouchableOpacity>
     </View>
   );
 };

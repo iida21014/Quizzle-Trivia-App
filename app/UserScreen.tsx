@@ -181,17 +181,21 @@ const UserScreen = () => {
     );
   };
 
-  // Function to handle logout
-  const handleLogout = async () => {
-    try {
-      await AsyncStorage.removeItem('token'); // Remove the JWT token
-      await AsyncStorage.removeItem('username'); // Remove the username from storage
-      navigation.replace('LoginScreen'); // Navigate to the login screen
-    } catch (error) {
-      console.error('Error logging out:', error);
-      Alert.alert('Error', 'Failed to log out');
-    }
-  };
+ // Function to handle logout
+const handleLogout = async () => {
+  try {
+    await AsyncStorage.removeItem('token'); // Remove the JWT token
+    await AsyncStorage.removeItem('username'); // Remove the username from storage
+
+    Alert.alert('Success', 'Logging out successful'); // Show success alert
+
+    navigation.replace('LoginScreen'); // Navigate to the login screen
+  } catch (error) {
+    console.error('Error logging out:', error);
+    Alert.alert('Error', 'Failed to log out'); // Show error alert if logout fails
+  }
+};
+
 
   return (
     <View style={styles.container}>

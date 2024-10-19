@@ -110,7 +110,7 @@ export default function HomeScreen() {
             style={styles.button}
             onPress={() => router.push('/UserScreen')}  // Navigate to User Info screen
           >
-            <Text style={styles.buttonText}>User Info</Text>
+            <Text style={styles.buttonText}>Settings</Text>
           </TouchableOpacity>
       )}
       </View>
