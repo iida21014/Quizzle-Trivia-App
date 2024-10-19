@@ -178,7 +178,7 @@ export default function QuizResult() {
           {/* A button for playing a new game */}
           <TouchableOpacity 
             style={styles.button}
-            onPress={() => router.push('/createQuiz')}  // Navigate to create quiz
+            onPress={() => router.back()}  // Navigate to create quiz
           >
             <Text style={styles.buttonText}>Play again</Text>
           </TouchableOpacity>
@@ -186,7 +186,7 @@ export default function QuizResult() {
           {/* Button for Leaderboard */}
           <TouchableOpacity 
             style={styles.button}
-            onPress={() => router.push('/leaderboard')}  // Navigate to Leaderboard screen
+            onPress={() => router.replace('/leaderboard')}  // Navigate to Leaderboard screen
           >
             <Text style={styles.buttonText}>Leaderboard</Text>
           </TouchableOpacity>
