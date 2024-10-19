@@ -91,7 +91,12 @@ export default function HomeScreen() {
         {/* Button for Play Game */}
         <TouchableOpacity 
           style={styles.button}
-          onPress={() => router.push('/createQuiz')}  // Navigate to Quiz screen
+          onPress={() => router.push({
+            pathname: '/createQuiz',
+            params: {
+              clearOptions: true,
+            }
+          })}  // Navigate to Quiz screen
         >
           <Text style={styles.buttonText}>Play Game</Text>
         </TouchableOpacity>

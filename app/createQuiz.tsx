@@ -1,10 +1,11 @@
-import { useState, useCallback } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Link } from 'expo-router';
+import { useState, useCallback, useEffect } from 'react';
+import { View, Text } from 'react-native';
+import { Link, useLocalSearchParams } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';
 import styles from './styles';
 import { Audio } from 'expo-av';
 import { useFocusEffect } from '@react-navigation/native'; // Import useFocusEffect
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // This is the form in the beginning of the quiz.
 // You can choose the game difficulty and category.
@@ -27,10 +28,43 @@ const categories = [
 const numberOfQuestions = 10;
 
 export default function CreateQuiz() {
+  // Main view sets this flag when navigating so that previously saved options can be cleared
+  const { clearOptions } = useLocalSearchParams();
+  
   // State for difficulty
   const [selectedDifficulty, setSelectedDifficulty] = useState('medium');
   // State for number of questions
   const [selectedCategoryId, setSelectedCategoryId] = useState(0);
+
+  async function restoreOptions() {
+    if (clearOptions) {
+      await saveOptions(); // Saving default options from state into Async Storage
+      return;
+    }
+    
+    const options = await AsyncStorage.getItem('quizOptions');
+    if (options == null) {
+      return;
+    }
+
+    const { difficulty, categoryId } = JSON.parse(options);
+    setSelectedDifficulty(difficulty);
+    setSelectedCategoryId(categoryId);
+  }
+
+  async function saveOptions() {
+    await AsyncStorage.setItem('quizOptions', JSON.stringify({ difficulty: selectedDifficulty, categoryId: selectedCategoryId }));
+  }
+
+  useEffect(() => {
+    restoreOptions();
+  }, []);
+
+
+  // Saving options into Async Storage every time they are changed
+  useEffect(() => {
+    saveOptions();
+  }, [selectedDifficulty, selectedCategoryId])
 
   let music; // Local variable to store the sound instance
 
