@@ -233,7 +233,7 @@ const handleLogout = async () => {
 
       {/* Music Toggle Switch */}
       <View style={styles.settingRow}>
-        <Text>Music</Text>
+        <Text>Music 🎵</Text>
         <Switch 
         onValueChange={toggleMusic} 
         value={isMusicEnabled}
@@ -244,7 +244,7 @@ const handleLogout = async () => {
 
       {/* Sound Effects Toggle Switch */}
       <View style={styles.settingRow}>
-        <Text>Sounds</Text>
+        <Text>Sounds 🔉</Text>
         <Switch 
         onValueChange={toggleSound} 
         value={isSoundEnabled}
