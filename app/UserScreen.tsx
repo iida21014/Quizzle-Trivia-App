@@ -1,15 +1,18 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, Alert, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, Alert, TextInput, TouchableOpacity, Switch } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // For storing JWT securely
 import { useNavigation } from '@react-navigation/native'; // For navigation after logout
 import { UserScreenNavigationProp } from './navigationTypes'; // Import the navigation prop type
 import styles from './styles';
 import { useRouter } from 'expo-router';
-import { handleScreenMusic } from './soundManager'; // Import sound-related functions from soundManager
+import { handleScreenMusic, playMusic, stopMusic } from './soundManager'; // Import sound-related functions from soundManager
+import { createSettingsTable, getSettings, saveSettings } from './database'; // Import your SQLite helper functions
 
 const UserScreen = () => {
   const [username, setUsername] = useState('');
   const [newUsername, setNewUsername] = useState(''); // State to store the new username
+  const [isMusicEnabled, setIsMusicEnabled] = useState(true);
+  const [isSoundEnabled, setIsSoundEnabled] = useState(true);
   const navigation = useNavigation<UserScreenNavigationProp>(); // Use the imported type for navigation
   const router = useRouter();  // Initialize router
 
@@ -19,9 +22,10 @@ const UserScreen = () => {
 
   handleScreenMusic(sounds.allAroundMusic); // This will handle music play/stop on screen focus
 
-  // Fetch user data when the component mounts
+  // Fetch user data and settings when the component mounts
   useEffect(() => {
-    const fetchUserData = async () => {
+    const fetchUserDataAndSettings = async () => {
+      // Fetch user data
       try {
         const token = await AsyncStorage.getItem('token'); // Retrieve token
 
@@ -48,9 +52,15 @@ const UserScreen = () => {
         console.error('Error fetching user data:', error);
         Alert.alert('Error', 'An error occurred while fetching user data');
       }
+
+      // Fetch settings
+      await createSettingsTable(); // Ensure the settings table exists
+      const settings = await getSettings();
+      setIsMusicEnabled(settings.musicEnabled === 1);
+      setIsSoundEnabled(settings.soundEnabled === 1);
     };
 
-    fetchUserData();
+    fetchUserDataAndSettings();
   }, []);
 
   // Function to handle username update
@@ -91,6 +101,30 @@ const UserScreen = () => {
       Alert.alert('Error', 'An error occurred while updating the username');
     }
   };
+
+    // Function to toggle music state and save to SQLite
+    const toggleMusic = async () => {
+      const newState = !isMusicEnabled;
+      setIsMusicEnabled(newState);
+      await saveSettings(newState, isSoundEnabled); // Save to SQLite
+
+      if (newState==true){
+        playMusic(sounds.allAroundMusic)
+      };
+
+      if (newState==false){
+        stopMusic();
+      }
+
+    };
+  
+    // Function to toggle sound effects state and save to SQLite
+    const toggleSound = async () => {
+      const newState = !isSoundEnabled;
+      setIsSoundEnabled(newState);
+      await saveSettings(isMusicEnabled, newState); // Save to SQLite
+    
+    };
 
   // Function to handle user deletion
   const deleteUser = async () => {
@@ -161,7 +195,8 @@ const handleLogout = async () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.welcomeText}>Welcome, {username}!</Text>
+    <Text style={styles.welcomeText}>Welcome, {username}!</Text>
+    
 
       {/* Input field for new username */}
       <TextInput
@@ -170,15 +205,11 @@ const handleLogout = async () => {
         value={newUsername}
         onChangeText={setNewUsername} // Update newUsername state
       />
+ 
 
       {/* Button for Updating username */}
-      <TouchableOpacity style={styles.button} onPress={updateUsername}>
+      <TouchableOpacity style={styles.updateUsernamebutton} onPress={updateUsername}>
         <Text style={styles.buttonText}>Update Username</Text>
-      </TouchableOpacity>
-
-      {/* Button for logging out */}
-      <TouchableOpacity style={styles.button} onPress={handleLogout}>
-        <Text style={styles.buttonText}>Logout</Text>
       </TouchableOpacity>
 
       {/* Button for Leaderboard */}
@@ -188,11 +219,42 @@ const handleLogout = async () => {
           >
           <Text style={styles.buttonText}>Leaderboard</Text>
         </TouchableOpacity>
+        
+      {/* Button for logging out */}
+      <TouchableOpacity style={styles.button} onPress={handleLogout}>
+        <Text style={styles.buttonText}>Logout</Text>
+      </TouchableOpacity>
 
       {/* Button for deleting the account */}
       <TouchableOpacity style={styles.deleteButtonContainer} onPress={deleteUser}>
         <Text style={styles.buttonText}>Delete account</Text>
       </TouchableOpacity>
+
+
+      {/* Music Toggle Switch */}
+      <View style={styles.settingRow}>
+        <Text>Music</Text>
+        <Switch 
+        onValueChange={toggleMusic} 
+        value={isMusicEnabled}
+        trackColor={{false: '#767577', true: '#a899cf'}}
+        thumbColor={isMusicEnabled ? '#65558F' : '#f4f3f4'}
+        />
+      </View>
+
+      {/* Sound Effects Toggle Switch */}
+      <View style={styles.settingRow}>
+        <Text>Sounds</Text>
+        <Switch 
+        onValueChange={toggleSound} 
+        value={isSoundEnabled}
+        trackColor={{false: '#767577', true: '#a899cf'}}
+        thumbColor={isSoundEnabled ? '#65558F' : '#f4f3f4'} 
+        />
+      </View>
+
+      
+      
     </View>
   );
 };

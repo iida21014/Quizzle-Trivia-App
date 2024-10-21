@@ -154,6 +154,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 
+  settingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    
+  },
+
+
   startButtonContainer: {
     marginTop: 10,
     alignItems: 'center',
@@ -213,6 +221,17 @@ const styles = StyleSheet.create({
     color: '#333',
     textAlign: 'center',
     marginBottom: 20,
+  },
+
+  updateUsernamebutton:{
+    backgroundColor: '#65558F', // Button color
+    width: 200,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 20,        // Space between buttons
   },
   
   username: {
