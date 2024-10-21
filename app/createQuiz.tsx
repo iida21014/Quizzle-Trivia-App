@@ -3,9 +3,8 @@ import { View, Text } from 'react-native';
 import { Link, useLocalSearchParams } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';
 import styles from './styles';
-import { Audio } from 'expo-av';
-import { useFocusEffect } from '@react-navigation/native'; // Import useFocusEffect
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { handleScreenMusic} from './soundManager'; // Import sound-related functions from soundManager
 
 // This is the form in the beginning of the quiz.
 // You can choose the game difficulty and category.
@@ -66,48 +65,11 @@ export default function CreateQuiz() {
     saveOptions();
   }, [selectedDifficulty, selectedCategoryId])
 
-  let music; // Local variable to store the sound instance
-
-  // Function to play the music
-  const playMusic = async () => {
-    try {
-      console.log('Loading Sound');
-      const { sound: newMusic } = await Audio.Sound.createAsync(
-        require('../assets/sounds/leaderboard.wav')
-      );
-      music = newMusic; // Store the sound instance in the local variable
-      await music.setIsLoopingAsync(true); // Loop the sound
-      console.log('Playing Sound');
-      await music.playAsync(); // Start playing the sound
-    } catch (error) {
-      console.error('Error loading sound:', error);
-    }
+  const sounds = {
+    allAroundMusic: require('../assets/sounds/allAround.wav'), // Add your quiz music file here
   };
 
-  // Function to stop and unload the music
-  const stopMusic = async () => {
-    if (music) {
-      try {
-        console.log('Stopping and unloading music');
-        await music.stopAsync();    // Stop the sound
-        await music.unloadAsync();  // Unload to free resources
-        music = null;               // Clear the sound reference
-      } catch (error) {
-        console.error('Error stopping/unloading sound:', error);
-      }
-    }
-  };
-
-  // Manage play/stop based on screen focus
-  useFocusEffect(
-    useCallback(() => {
-      playMusic(); // Play music when the screen gains focus
-
-      return () => {
-        stopMusic(); // Stop and unload music when the screen loses focus
-      };
-    }, []) // Empty dependency array ensures effect only runs on focus/blur
-  );
+  handleScreenMusic(sounds.allAroundMusic); // This will handle music play/stop on screen focus
 
   return (
     <View style={styles.container}>

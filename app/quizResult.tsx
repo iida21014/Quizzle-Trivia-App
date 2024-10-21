@@ -3,8 +3,8 @@ import { View, Text, Alert, TouchableOpacity} from 'react-native';
 import { useLocalSearchParams, Link } from 'expo-router';
 import styles from './styles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Audio } from 'expo-av';
 import { useRouter } from 'expo-router';
+import { playSound } from './soundManager'; // Import sound-related functions from soundManager
 
 export default function QuizResult() {
   const { totalPoints, categoryId } = useLocalSearchParams();   // Reading game results which have been set by Quiz view when navigating here
@@ -22,31 +22,6 @@ export default function QuizResult() {
     leaderboard: require('../assets/sounds/leaderboardScore.wav'),
     noRecord: require('../assets/sounds/noRecord.wav'),
   };  
-
-  // Function to play sound effects (only one sound should play at a time)
-  async function playSound(soundFile) {
-    if (sound) {
-      console.log('Stopping previous sound');
-      await sound.stopAsync();
-      await sound.unloadAsync(); // Unload previous sound
-    }
-
-    console.log('Loading sound:', soundFile);
-    const { sound: newSound } = await Audio.Sound.createAsync(soundFile);
-    setSound(newSound);
-    console.log('Playing sound');
-    await newSound.playAsync();
-  }
-
-  // Cleanup function to unload the sound when the component unmounts
-  useEffect(() => {
-    return sound
-      ? () => {
-          console.log('Unloading sound');
-          sound.unloadAsync();
-        }
-      : undefined;
-  }, [sound]);
 
   // Fetch the username from AsyncStorage when the component mounts
   useEffect(() => {
