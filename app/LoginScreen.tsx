@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
@@ -22,7 +22,7 @@ const LoginScreen = () => {
   const handleLogin = async () => {
     setLoading(true);
     try {
-      console.log('Attempting to log in with:', { username, password });
+      // console.log('Attempting to log in with:', { username, password });
   
       const response = await fetch('https://quizzleapp.lm.r.appspot.com/login', {
         method: 'POST',
@@ -32,9 +32,9 @@ const LoginScreen = () => {
         body: JSON.stringify({ username, password }),
       });
   
-      console.log('Response status:', response.status);
+      // console.log('Response status:', response.status);
       const data = await response.json();
-      console.log('Response data:', data);
+      // console.log('Response data:', data);
   
       if (response.ok) {
         await AsyncStorage.setItem('token', data.token); // Store the token securely
@@ -43,7 +43,7 @@ const LoginScreen = () => {
           {
             text: 'OK',
             onPress: () => {
-              console.log('Navigating to start screen');
+              // console.log('Navigating to start screen');
               // Use navigation.replace to reset the stack and go to home screen
               navigation.reset({
                 index: 0, // Ensure the home screen is the only one in the stack

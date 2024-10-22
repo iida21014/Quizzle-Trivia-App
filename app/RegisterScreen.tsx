@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, Alert, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { RegisterScreenNavigationProp } from './navigationTypes';
@@ -30,9 +30,9 @@ const RegisterScreen = () => {
       });
   
       const data = await response.json();
-      console.log('Response Status:', response.status);
-      console.log('Response Data:', data);
-      console.log('Response OK:', response.ok); // Check the response status
+      // console.log('Response Status:', response.status);
+      // console.log('Response Data:', data);
+      // console.log('Response OK:', response.ok);
   
       if (response.ok) {
         Alert.alert(

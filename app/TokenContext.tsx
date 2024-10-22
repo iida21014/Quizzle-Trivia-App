@@ -39,7 +39,7 @@ export const TokenProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // useEffect hook to log the token whenever it changes (for debugging or informational purposes)
   useEffect(() => {
-    console.log('Current token:', token);  // Log token value to the console when it updates
+   // Log token value to the console when it updates console.log('Current token:', token);  
   }, [token]);  // Run this effect whenever `token` state changes
   
   // Provide the token and regeneration function to the context consumers

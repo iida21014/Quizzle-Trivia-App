@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, Alert, TextInput, TouchableOpacity, Switch } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // For storing JWT securely
-import { useNavigation } from '@react-navigation/native'; // For navigation after logout
-import { UserScreenNavigationProp } from './navigationTypes'; // Import the navigation prop type
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
+import { UserScreenNavigationProp } from './navigationTypes';
 import styles from './styles';
 import { useRouter } from 'expo-router';
 import { handleScreenMusic, playMusic, stopMusic } from './soundManager'; // Import sound-related functions from soundManager
@@ -10,11 +10,11 @@ import { createSettingsTable, getSettings, saveSettings } from './database'; // 
 
 const UserScreen = () => {
   const [username, setUsername] = useState('');
-  const [newUsername, setNewUsername] = useState(''); // State to store the new username
+  const [newUsername, setNewUsername] = useState('');
   const [isMusicEnabled, setIsMusicEnabled] = useState(true);
   const [isSoundEnabled, setIsSoundEnabled] = useState(true);
-  const navigation = useNavigation<UserScreenNavigationProp>(); // Use the imported type for navigation
-  const router = useRouter();  // Initialize router
+  const navigation = useNavigation<UserScreenNavigationProp>();
+  const router = useRouter();
 
   const sounds = {
     allAroundMusic: require('../assets/sounds/allAround.wav'), // Add your quiz music file here

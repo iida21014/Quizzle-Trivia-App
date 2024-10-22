@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import styles from './styles';
-import { isLoggedIn } from './authStatus'; // Ensure this function is properly implemented
+import { isLoggedIn } from './authStatus';
 import { handleScreenMusic} from './soundManager'; // Import sound-related functions from soundManager
 
 
@@ -26,7 +26,7 @@ export default function HomeScreen() {
   // useFocusEffect to check login status when the screen is focused
   useFocusEffect(
     useCallback(() => {
-      console.log('Home screen focused, checking login status...');
+      // console.log('Home screen focused, checking login status...');
       checkLoginStatus();  // Check login status when the home screen gains focus
     }, [])
   );
