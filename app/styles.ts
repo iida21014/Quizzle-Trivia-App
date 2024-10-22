@@ -15,17 +15,17 @@ const styles = StyleSheet.create({
   },
 
   button: {
-    backgroundColor: '#65558F', // Button color
+    backgroundColor: '#65558F',
     width: 200,
     height: 50,
     borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
-    marginVertical: 10,        // Space between buttons
+    marginVertical: 10,
   },
 
   buttonText: {
-    color: '#fff',             // White text color
+    color: '#fff',
     fontSize: 16,
   },
 
@@ -33,11 +33,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#e7e2f2', // Background color for the whole page
+    backgroundColor: '#e7e2f2',
   },
   
   contentContainer: {
-    backgroundColor: '#fff',   // White background for the content area
+    backgroundColor: '#fff',
     padding: 20,
     borderRadius: 10,
   },
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
-    marginVertical: 10,        // Space between buttons
+    marginVertical: 10,
   },
 
   disabledButton: {
@@ -224,14 +224,14 @@ const styles = StyleSheet.create({
   },
 
   updateUsernamebutton:{
-    backgroundColor: '#65558F', // Button color
+    backgroundColor: '#65558F',
     width: 200,
     height: 50,
     borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 10,
-    marginBottom: 20,        // Space between buttons
+    marginBottom: 20,
   },
   
   username: {
