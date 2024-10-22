@@ -2,10 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Alert, TextInput, TouchableOpacity, Switch } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
-import { UserScreenNavigationProp } from './navigationTypes';
 import styles from './styles';
 import { useRouter } from 'expo-router';
-import { handleScreenMusic, playMusic, stopMusic } from './soundManager'; // Import sound-related functions from soundManager
+import { handleScreenMusic, playMusic, stopMusic } from './soundManager';
 import { createSettingsTable, getSettings, saveSettings } from './database'; // Import your SQLite helper functions
 
 const UserScreen = () => {
@@ -13,7 +12,7 @@ const UserScreen = () => {
   const [newUsername, setNewUsername] = useState('');
   const [isMusicEnabled, setIsMusicEnabled] = useState(true);
   const [isSoundEnabled, setIsSoundEnabled] = useState(true);
-  const navigation = useNavigation<UserScreenNavigationProp>();
+  const navigation = useNavigation(); // Removed type annotation
   const router = useRouter();
 
   const sounds = {
@@ -102,29 +101,25 @@ const UserScreen = () => {
     }
   };
 
-    // Function to toggle music state and save to SQLite
-    const toggleMusic = async () => {
-      const newState = !isMusicEnabled;
-      setIsMusicEnabled(newState);
-      await saveSettings(newState, isSoundEnabled); // Save to SQLite
+  // Function to toggle music state and save to SQLite
+  const toggleMusic = async () => {
+    const newState = !isMusicEnabled;
+    setIsMusicEnabled(newState);
+    await saveSettings(newState, isSoundEnabled); // Save to SQLite
 
-      if (newState==true){
-        playMusic(sounds.allAroundMusic)
-      };
+    if (newState) {
+      playMusic(sounds.allAroundMusic);
+    } else {
+      stopMusic();
+    }
+  };
 
-      if (newState==false){
-        stopMusic();
-      }
-
-    };
-  
-    // Function to toggle sound effects state and save to SQLite
-    const toggleSound = async () => {
-      const newState = !isSoundEnabled;
-      setIsSoundEnabled(newState);
-      await saveSettings(isMusicEnabled, newState); // Save to SQLite
-    
-    };
+  // Function to toggle sound effects state and save to SQLite
+  const toggleSound = async () => {
+    const newState = !isSoundEnabled;
+    setIsSoundEnabled(newState);
+    await saveSettings(isMusicEnabled, newState); // Save to SQLite
+  };
 
   // Function to handle user deletion
   const deleteUser = async () => {
@@ -144,7 +139,7 @@ const UserScreen = () => {
                 Alert.alert('Error', 'No token found');
                 return;
               }
-    
+
               const response = await fetch('https://quizzleapp.lm.r.appspot.com/delete-user', {
                 method: 'DELETE',
                 headers: {
@@ -177,26 +172,24 @@ const UserScreen = () => {
     );
   };
 
- // Function to handle logout
-const handleLogout = async () => {
-  try {
-    await AsyncStorage.removeItem('token'); // Remove the JWT token
-    await AsyncStorage.removeItem('username'); // Remove the username from storage
+  // Function to handle logout
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('token'); // Remove the JWT token
+      await AsyncStorage.removeItem('username'); // Remove the username from storage
 
-    Alert.alert('Success', 'Logging out successful'); // Show success alert
+      Alert.alert('Success', 'Logging out successful'); // Show success alert
 
-    navigation.replace('LoginScreen'); // Navigate to the login screen
-  } catch (error) {
-    console.error('Error logging out:', error);
-    Alert.alert('Error', 'Failed to log out'); // Show error alert if logout fails
-  }
-};
-
+      navigation.replace('LoginScreen'); // Navigate to the login screen
+    } catch (error) {
+      console.error('Error logging out:', error);
+      Alert.alert('Error', 'Failed to log out'); // Show error alert if logout fails
+    }
+  };
 
   return (
     <View style={styles.container}>
-    <Text style={styles.welcomeText}>Welcome, {username}!</Text>
-    
+      <Text style={styles.welcomeText}>Welcome, {username}!</Text>
 
       {/* Input field for new username */}
       <TextInput
@@ -205,7 +198,6 @@ const handleLogout = async () => {
         value={newUsername}
         onChangeText={setNewUsername} // Update newUsername state
       />
- 
 
       {/* Button for Updating username */}
       <TouchableOpacity style={styles.updateUsernamebutton} onPress={updateUsername}>
@@ -213,13 +205,13 @@ const handleLogout = async () => {
       </TouchableOpacity>
 
       {/* Button for Leaderboard */}
-       <TouchableOpacity 
-          style={styles.button}
-          onPress={() => router.push('/leaderboard')}  // Navigate to Leaderboard screen
-          >
-          <Text style={styles.buttonText}>Leaderboard</Text>
-        </TouchableOpacity>
-        
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => router.push('/leaderboard')} // Navigate to Leaderboard screen
+      >
+        <Text style={styles.buttonText}>Leaderboard</Text>
+      </TouchableOpacity>
+
       {/* Button for logging out */}
       <TouchableOpacity style={styles.button} onPress={handleLogout}>
         <Text style={styles.buttonText}>Logout</Text>
@@ -230,31 +222,27 @@ const handleLogout = async () => {
         <Text style={styles.buttonText}>Delete account</Text>
       </TouchableOpacity>
 
-
       {/* Music Toggle Switch */}
       <View style={styles.settingRow}>
         <Text>Music 🎵</Text>
-        <Switch 
-        onValueChange={toggleMusic} 
-        value={isMusicEnabled}
-        trackColor={{false: '#767577', true: '#a899cf'}}
-        thumbColor={isMusicEnabled ? '#65558F' : '#f4f3f4'}
+        <Switch
+          onValueChange={toggleMusic}
+          value={isMusicEnabled}
+          trackColor={{ false: '#767577', true: '#a899cf' }}
+          thumbColor={isMusicEnabled ? '#65558F' : '#f4f3f4'}
         />
       </View>
 
       {/* Sound Effects Toggle Switch */}
       <View style={styles.settingRow}>
         <Text>Sounds 🔉</Text>
-        <Switch 
-        onValueChange={toggleSound} 
-        value={isSoundEnabled}
-        trackColor={{false: '#767577', true: '#a899cf'}}
-        thumbColor={isSoundEnabled ? '#65558F' : '#f4f3f4'} 
+        <Switch
+          onValueChange={toggleSound}
+          value={isSoundEnabled}
+          trackColor={{ false: '#767577', true: '#a899cf' }}
+          thumbColor={isSoundEnabled ? '#65558F' : '#f4f3f4'}
         />
       </View>
-
-      
-      
     </View>
   );
 };

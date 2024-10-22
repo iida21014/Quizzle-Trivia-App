@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Alert, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { RegisterScreenNavigationProp } from './navigationTypes';
-import styles from './styles';
-import { handleScreenMusic} from './soundManager'; // Import sound-related functions from soundManager
+import { useNavigation } from '@react-navigation/native'; // Remove TypeScript-specific type
+import styles from './styles';  // Ensure it's pointing to the correct styles file
+import { handleScreenMusic } from './soundManager'; // Import sound-related functions from soundManager
 
 const RegisterScreen = () => {
-  const navigation = useNavigation<RegisterScreenNavigationProp>();
+  const navigation = useNavigation(); 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const sounds = {
-    allAroundMusic: require('../assets/sounds/allAround.wav'), // Add your quiz music file here
+    allAroundMusic: require('../assets/sounds/allAround.wav'), // Path to the sound file
   };
 
   handleScreenMusic(sounds.allAroundMusic); // This will handle music play/stop on screen focus
@@ -30,10 +29,7 @@ const RegisterScreen = () => {
       });
   
       const data = await response.json();
-      // console.log('Response Status:', response.status);
-      // console.log('Response Data:', data);
-      // console.log('Response OK:', response.ok);
-  
+
       if (response.ok) {
         Alert.alert(
           'Success',
@@ -42,11 +38,11 @@ const RegisterScreen = () => {
             {
               text: 'OK',
               onPress: () => {
-                navigation.navigate('LoginScreen');
+                navigation.navigate('LoginScreen'); // Navigate to login screen after registration
               },
             },
           ],
-          { cancelable: false } //Prevent dismissal by tapping outside
+          { cancelable: false } // Prevent dismissal by tapping outside
         );
       } else {
         Alert.alert('Registration failed', data.error || 'Failed to register');
@@ -59,8 +55,6 @@ const RegisterScreen = () => {
     }
   };
   
-  
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Register</Text>
@@ -89,6 +83,5 @@ const RegisterScreen = () => {
     </View>
   );
 };
-
 
 export default RegisterScreen;

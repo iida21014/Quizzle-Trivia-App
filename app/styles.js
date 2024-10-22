@@ -8,7 +8,7 @@ const screenHeight = screenDimensions.height;
 
 const styles = StyleSheet.create({
 
-  //  Styles in alphabethical order:
+  // Styles in alphabetical order:
 
   animatedText: {
     fontWeight: 'bold',
@@ -102,7 +102,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 
-
   noScores:{
     textAlign: 'center'
   },
@@ -136,7 +135,6 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
 
-
   rank: {
     width: 30,  // Fixed width for rank column
     fontWeight: 'bold',
@@ -158,9 +156,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    
   },
-
 
   startButtonContainer: {
     marginTop: 10,

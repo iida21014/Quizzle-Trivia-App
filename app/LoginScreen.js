@@ -2,28 +2,25 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
-import { LoginScreenNavigationProp } from './navigationTypes';
 import styles from './styles';
-import { handleScreenMusic} from './soundManager'; // Import sound-related functions from soundManager
+import { handleScreenMusic } from './soundManager'; 
 
 const LoginScreen = () => {
-  const navigation = useNavigation<LoginScreenNavigationProp>();
+  const navigation = useNavigation();  // Call the hook as a function
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const sounds = {
-    allAroundMusic: require('../assets/sounds/allAround.wav'), // Add your quiz music file here
+    allAroundMusic: require('../assets/sounds/allAround.wav'), // Path to the sound file
   };
 
-  handleScreenMusic(sounds.allAroundMusic); // This will handle music play/stop on screen focus
+  handleScreenMusic(sounds.allAroundMusic); // Handle music play/stop on screen focus
 
   // Function to handle login
   const handleLogin = async () => {
     setLoading(true);
     try {
-      // console.log('Attempting to log in with:', { username, password });
-  
       const response = await fetch('https://quizzleapp.lm.r.appspot.com/login', {
         method: 'POST',
         headers: {
@@ -31,11 +28,9 @@ const LoginScreen = () => {
         },
         body: JSON.stringify({ username, password }),
       });
-  
-      // console.log('Response status:', response.status);
+
       const data = await response.json();
-      // console.log('Response data:', data);
-  
+
       if (response.ok) {
         await AsyncStorage.setItem('token', data.token); // Store the token securely
         await AsyncStorage.setItem('username', username); // Store username in AsyncStorage
@@ -43,11 +38,9 @@ const LoginScreen = () => {
           {
             text: 'OK',
             onPress: () => {
-              // console.log('Navigating to start screen');
-              // Use navigation.replace to reset the stack and go to home screen
               navigation.reset({
                 index: 0, // Ensure the home screen is the only one in the stack
-                routes: [{ name: 'index' }], // Name of your home screen
+                routes: [{ name: 'index' }], // Navigate to the 'index' screen
               });
             },
           },
@@ -62,7 +55,7 @@ const LoginScreen = () => {
       setLoading(false);
     }
   };
-  
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Login</Text>

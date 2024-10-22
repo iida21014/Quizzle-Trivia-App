@@ -1,19 +1,13 @@
 import React, { createContext, useState, useEffect } from 'react';
 
-// Define the context type interface for token management
-interface TokenContextType {
-  token: string | null;              // The current token, or null if not yet generated
-  regenerateToken: () => Promise<void>; // Function to regenerate a new token
-}
-
 // Create the TokenContext with default value as null
-export const TokenContext = createContext<TokenContextType | null>(null);
+export const TokenContext = createContext(null);
 
 // Create a provider component to wrap the app or components that need token access
-export const TokenProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [token, setToken] = useState<string | null>(null);  // State to store the token
+export const TokenProvider = ({ children }) => {
+  const [token, setToken] = useState(null);  // State to store the token
 
-  // Function to generate a new token by making an API request (this token is for not getting the same questions in the same session)
+  // Function to generate a new token by making an API request
   const generateToken = async () => {
     try {
       // Fetch a new session token from the API
@@ -39,11 +33,10 @@ export const TokenProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // useEffect hook to log the token whenever it changes (for debugging or informational purposes)
   useEffect(() => {
-   // Log token value to the console when it updates console.log('Current token:', token);  
+    console.log('Current token:', token);  
   }, [token]);  // Run this effect whenever `token` state changes
-  
+
   // Provide the token and regeneration function to the context consumers
-  // Render the children components passed to the provider
   return (
     <TokenContext.Provider value={{ token, regenerateToken }}>
       {children}

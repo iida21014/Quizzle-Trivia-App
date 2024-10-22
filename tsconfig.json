@@ -1,17 +1,10 @@
 {
+  "compilerOptions": {},
   "extends": "expo/tsconfig.base",
-  "compilerOptions": {
-    "strict": true,
-    "paths": {
-      "@/*": [
-        "./*"
-      ]
-    }
-  },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-, "app/styles.js", "app/UserScreen.tsx", "app/TokenContext.js", "app/TimeLeftBar.js", "app/soundManager.js", "app/RegisterScreen.js", "app/quizResult.js", "app/quiz.js", "app/QuestionCard.js", "app/navigationTypes.js", "app/LoginScreen.js", "app/leaderboard.js", "app/index.js", "app/database.js", "app/createQuiz.js", "app/_layout.js", "app/AnimatedText.js"  ]
+  ]
 }
