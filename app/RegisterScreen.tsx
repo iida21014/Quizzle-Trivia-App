@@ -17,6 +17,7 @@ const RegisterScreen = () => {
 
   handleScreenMusic(sounds.allAroundMusic); // This will handle music play/stop on screen focus
 
+  // Function to handle registering a user
   const handleRegister = async () => {
     setLoading(true);
     try {

@@ -18,7 +18,7 @@ const LoginScreen = () => {
 
   handleScreenMusic(sounds.allAroundMusic); // This will handle music play/stop on screen focus
 
-
+  // Function to handle login
   const handleLogin = async () => {
     setLoading(true);
     try {
@@ -101,7 +101,7 @@ const LoginScreen = () => {
       )}
       <Text>Don't have an account?</Text>
       <TouchableOpacity
-        style={styles.button} // Add styles for this button
+        style={styles.button}
         onPress={() => navigation.replace('RegisterScreen')} // Navigate to the Register Screen
       >
         <Text style={styles.buttonText}>Register</Text>

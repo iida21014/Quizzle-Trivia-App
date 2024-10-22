@@ -4,7 +4,6 @@ import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import styles from './styles';
 import { isLoggedIn } from './authStatus'; // Ensure this function is properly implemented
-import { Audio } from 'expo-av';
 import { handleScreenMusic} from './soundManager'; // Import sound-related functions from soundManager
 
 

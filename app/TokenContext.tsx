@@ -13,7 +13,7 @@ export const TokenContext = createContext<TokenContextType | null>(null);
 export const TokenProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [token, setToken] = useState<string | null>(null);  // State to store the token
 
-  // Function to generate a new token by making an API request
+  // Function to generate a new token by making an API request (this token is for not getting the same questions in the same session)
   const generateToken = async () => {
     try {
       // Fetch a new session token from the API
