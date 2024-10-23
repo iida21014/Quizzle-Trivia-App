@@ -86,13 +86,13 @@ export default function QuizResult() {
   useEffect(() => {
     if (leaderboardPosition !== null || isPersonalRecord) {
       // Determine which sound to play (based on priority)
-      if (leaderboardPosition === -1) {
+      if (leaderboardPosition === -1 && isPersonalRecord === false) {
         playSound(sounds.noRecord); // Didn't reach leaderboard
       } else if (isPersonalRecord && leaderboardPosition !== null) {
         playSound(sounds.doubleScore); // Double victory!
-      } else if (leaderboardPosition !== null) {
+      } else if (leaderboardPosition !== null && leaderboardPosition === false) {
         playSound(sounds.leaderboard); // Leaderboard achievement
-      } else if (isPersonalRecord) {
+      } else if (isPersonalRecord && leaderboardPosition === -1) {
         playSound(sounds.personal); // Personal record but no leaderboard
       }
     }
