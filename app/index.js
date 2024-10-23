@@ -1,15 +1,20 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import styles from './styles';
 import { isLoggedIn } from './authStatus';
 import { handleScreenMusic} from './soundManager'; // Import sound-related functions from soundManager
+import { createSettingsTable } from './database'; // Ensure table is created early
 
 
 export default function HomeScreen() {
   const [loggedIn, setLoggedIn] = useState(false);  // State for login status
   const router = useRouter();  // Initialize router
+
+  useEffect(() => {
+    createSettingsTable(); // Create the settings table as soon as the app starts
+  }, []);
 
   const sounds = {
     indexMusic: require('../assets/sounds/indexMusic.wav'), // Add your quiz music file here
