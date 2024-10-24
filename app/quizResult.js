@@ -82,21 +82,25 @@ export default function QuizResult() {
   }, [username, totalPoints, categoryId]); // Only run when username is fetched and totalPoints/categoryId are valid
 
 
-  // Play sounds based on leaderboard position and personal record
-  useEffect(() => {
-    if (leaderboardPosition !== null || isPersonalRecord) {
-      // Determine which sound to play (based on priority)
-      if (leaderboardPosition === -1 && isPersonalRecord === false) {
-        playSound(sounds.noRecord); // Didn't reach leaderboard
-      } else if (isPersonalRecord && leaderboardPosition !== null) {
-        playSound(sounds.doubleScore); // Double victory!
-      } else if (leaderboardPosition !== null && leaderboardPosition === false) {
-        playSound(sounds.leaderboard); // Leaderboard achievement
-      } else if (isPersonalRecord && leaderboardPosition === -1) {
-        playSound(sounds.personal); // Personal record but no leaderboard
-      }
+// Play sounds based on leaderboard position and personal record
+useEffect(() => {
+  if (leaderboardPosition !== null || isPersonalRecord) {
+    // Prioritize personal record and leaderboard sounds, and only play one sound.
+    if (isPersonalRecord && leaderboardPosition === -1) {
+      // Play personal record sound when set a record but not on the leaderboard
+      playSound(sounds.personal);
+    } else if (leaderboardPosition === -1 && !isPersonalRecord) {
+      // Only play noRecord if no personal record and no leaderboard placement
+      playSound(sounds.noRecord);
+    } else if (leaderboardPosition !== null && !isPersonalRecord) {
+      // Leaderboard placement but no personal record
+      playSound(sounds.leaderboard);
+    } else if (leaderboardPosition !== null && isPersonalRecord) {
+      // Double victory: personal record + leaderboard 
+      playSound(sounds.doubleScore);
     }
-  }, [leaderboardPosition, isPersonalRecord]); // Only trigger when these states change
+  }
+}, [leaderboardPosition, isPersonalRecord]); // Only trigger when these states change
 
   // Returns UI element which shows leaderboard-related information
   // Renders both leaderboard and personal record conditions
