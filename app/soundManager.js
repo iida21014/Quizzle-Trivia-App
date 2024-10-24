@@ -28,12 +28,12 @@ export const playMusic = async (musicFile) => {
     if (isLoading) return; // Prevent loading if already loading
     isLoading = true; // Set loading state
 
-    console.log('Loading Music');
+    // console.log('Loading Music'); // Log for debugging
 
     const { sound: newMusic } = await Audio.Sound.createAsync(musicFile);
     music = newMusic;
     await music.setIsLoopingAsync(true); // Loop the sound
-    console.log('Playing Music');
+    // console.log('Playing Music'); // Log for debugging
     await music.playAsync();
     isLoading = false; // Reset loading state after playback starts
     isMusicLoaded = true; // Music is now loaded
@@ -48,7 +48,7 @@ export const playMusic = async (musicFile) => {
 export const stopMusic = async () => {
   if (music) {
     try {
-      console.log('Stopping and unloading music');
+      // console.log('Stopping and unloading music'); // Log for debugging
 
       // Only stop and unload if the music is loaded
       if (isMusicLoaded) {
@@ -83,10 +83,10 @@ export const playSound = async (soundFile) => {
 
   let sound;
   try {
-    console.log('Loading sound:', soundFile);
+    // console.log('Loading sound:', soundFile); // Log for debugging
     const { sound: newSound } = await Audio.Sound.createAsync(soundFile);
     sound = newSound;
-    console.log('Playing sound');
+    // console.log('Playing sound'); // Log for debugging
     await sound.playAsync();
 
     // Optionally unload the sound after it's done playing

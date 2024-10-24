@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Alert, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native'; // Remove TypeScript-specific type
 import styles from './styles';  // Ensure it's pointing to the correct styles file
-import { handleScreenMusic } from './soundManager'; // Import sound-related functions from soundManager
+import { handleScreenMusic } from './soundManager';
 
 const RegisterScreen = () => {
   const navigation = useNavigation(); 
@@ -11,10 +11,10 @@ const RegisterScreen = () => {
   const [loading, setLoading] = useState(false);
 
   const sounds = {
-    allAroundMusic: require('../assets/sounds/allAround.wav'), // Path to the sound file
+    allAroundMusic: require('../assets/sounds/allAround.wav'),
   };
 
-  handleScreenMusic(sounds.allAroundMusic); // This will handle music play/stop on screen focus
+  handleScreenMusic(sounds.allAroundMusic);  // This will start music when screen is in focus and stop it when the screen is not in focus
 
   // Function to handle registering a user
   const handleRegister = async () => {

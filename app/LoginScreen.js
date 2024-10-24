@@ -12,10 +12,10 @@ const LoginScreen = () => {
   const [loading, setLoading] = useState(false);
 
   const sounds = {
-    allAroundMusic: require('../assets/sounds/allAround.wav'), // Path to the sound file
+    allAroundMusic: require('../assets/sounds/allAround.wav'), // Quiz music file
   };
 
-  handleScreenMusic(sounds.allAroundMusic); // Handle music play/stop on screen focus
+  handleScreenMusic(sounds.allAroundMusic); // This will start music when screen is in focus and stop it when the screen is not in focus
 
   // Function to handle login
   const handleLogin = async () => {

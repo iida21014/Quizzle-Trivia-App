@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import styles from './styles';
 import { useRouter } from 'expo-router';
 import { handleScreenMusic, playMusic, stopMusic } from './soundManager';
-import { createSettingsTable, getSettings, saveSettings } from './database'; // Import your SQLite helper functions
+import { createSettingsTable, getSettings, saveSettings } from './database'; 
 
 const UserScreen = () => {
   const [username, setUsername] = useState('');
@@ -16,10 +16,10 @@ const UserScreen = () => {
   const router = useRouter();
 
   const sounds = {
-    allAroundMusic: require('../assets/sounds/allAround.wav'), // Add your quiz music file here
+    allAroundMusic: require('../assets/sounds/allAround.wav'),
   };
 
-  handleScreenMusic(sounds.allAroundMusic); // This will handle music play/stop on screen focus
+  handleScreenMusic(sounds.allAroundMusic); // This will start music when screen is in focus and stop it when the screen is not in focus
 
   // Fetch user data and settings when the component mounts
   useEffect(() => {

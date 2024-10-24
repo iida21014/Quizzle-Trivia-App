@@ -4,8 +4,8 @@ import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import styles from './styles';
 import { isLoggedIn } from './authStatus';
-import { handleScreenMusic } from './soundManager'; // Import sound-related functions from soundManager
-import { createSettingsTable } from './database'; // Ensure table is created early
+import { handleScreenMusic } from './soundManager';
+import { createSettingsTable } from './database'; 
 
 export default function HomeScreen() {
   const [loggedIn, setLoggedIn] = useState(false); // State for login status
@@ -16,10 +16,10 @@ export default function HomeScreen() {
   }, []);
 
   const sounds = {
-    indexMusic: require('../assets/sounds/indexMusic.wav'), // Add your quiz music file here
+    indexMusic: require('../assets/sounds/indexMusic.wav'), // Quiz music file
   };
 
-  handleScreenMusic(sounds.indexMusic); // This will handle music play/stop on screen focus
+  handleScreenMusic(sounds.indexMusic); // // This will start music when screen is in focus and stop it when the screen is not in focus
 
   // Function to check login status
   const checkLoginStatus = async () => {

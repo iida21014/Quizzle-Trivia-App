@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './styles';
 import { View, Text, FlatList, ActivityIndicator, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { handleScreenMusic} from './soundManager'; // Import sound-related functions from soundManager
+import { handleScreenMusic} from './soundManager'; 
 
 
 const LeaderboardScreen = () => {  
@@ -15,10 +15,10 @@ const LeaderboardScreen = () => {
   ]);  // Use state for dynamic routes
 
   const sounds = {
-    allAroundMusic: require('../assets/sounds/allAround.wav'), // Add your quiz music file here
+    allAroundMusic: require('../assets/sounds/allAround.wav'), // Quiz music file
   };
 
-  handleScreenMusic(sounds.allAroundMusic); // This will handle music play/stop on screen focus
+  handleScreenMusic(sounds.allAroundMusic); // This will start music when screen is in focus and stop it when the screen is not in focus
 
 
   const [leaderboardsView, setLeaderboardsView] = useState({
@@ -123,7 +123,7 @@ useEffect(() => {
         </Text>
   
         <Text style={[styles.username, item.username === username ? styles.yourUsername : null]}>
-          {item.username}  {/* Username conditionally bold if it matches current user */}
+          {item.username}  {/* Username in bold if it matches current user */}
         </Text>
   
         <Text style={styles.score}>

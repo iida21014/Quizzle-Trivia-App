@@ -79,10 +79,10 @@ export default function CreateQuiz() {
 
   // Music for createQuiz view:
   const sounds = {
-    allAroundMusic: require('../assets/sounds/allAround.wav'), // Add your quiz music file here
+    allAroundMusic: require('../assets/sounds/allAround.wav'), // Quiz music file
   };
 
-  handleScreenMusic(sounds.allAroundMusic); // This will handle music play/stop on screen focus
+  handleScreenMusic(sounds.allAroundMusic); // This will start music when screen is in focus and stop it when the screen is no in focus
 
   return (
     <View style={styles.container}>

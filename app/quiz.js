@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useCallback } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { View, Text } from 'react-native';
 import { decode } from 'he';
@@ -7,7 +7,7 @@ import { QuestionCard } from './QuestionCard';
 import { TokenContext } from './TokenContext';
 import TimeLeftBar from './TimeLeftBar';
 import AnimatedText from './AnimatedText';
-import { handleScreenMusic, playSound } from './soundManager'; // Import sound-related functions from soundManager
+import { handleScreenMusic, playSound } from './soundManager';
 
 // Function to shuffle array (used in shuffling quiz answer alternatives). Taken from: https://www.geeksforgeeks.org/how-to-shuffle-the-elements-of-an-array-in-javascript/
 function shuffleArray(array) {
@@ -80,10 +80,10 @@ export default function Quiz() {
   const sounds = {
     correct: require('../assets/sounds/correct.wav'),
     incorrect: require('../assets/sounds/incorrect.wav'),
-    quizMusic: require('../assets/sounds/gameMusic.wav'), // Add your quiz music file here
+    quizMusic: require('../assets/sounds/gameMusic.wav'), 
   };
 
-  handleScreenMusic(sounds.quizMusic); // This will handle music play/stop on screen focus
+  handleScreenMusic(sounds.quizMusic); // This will start music when screen is in focus and stop it when the screen is not in focus
 
   // Function to wait 2 seconds and then clear UI and show the next question.
   // End game after the last question.

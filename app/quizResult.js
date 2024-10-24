@@ -96,17 +96,21 @@ export default function QuizResult() {
 
   // Play sounds based on leaderboard position and personal record
   useEffect(() => {
-    if (leaderboardPosition !== null || isPersonalRecord) {
+    if (leaderboardPosition !== null 
+) {
       // Prioritize personal record and leaderboard sounds, and only play one sound.
       if (isPersonalRecord && leaderboardPosition === -1) {
         // Play personal record sound when set a record but not on the leaderboard
         playSound(sounds.personal);
+
       } else if (leaderboardPosition === -1 && !isPersonalRecord) {
         // Only play noRecord if no personal record and no leaderboard placement
         playSound(sounds.noRecord);
+
       } else if (leaderboardPosition !== null && !isPersonalRecord) {
         // Leaderboard placement but no personal record
         playSound(sounds.leaderboard);
+        
       } else if (leaderboardPosition !== null && isPersonalRecord) {
         // Double victory: personal record + leaderboard
         playSound(sounds.doubleScore);
