@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, Alert, TouchableOpacity} from 'react-native';
+import { View, Text, Alert, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, Link } from 'expo-router';
 import styles from './styles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -7,13 +7,13 @@ import { useRouter } from 'expo-router';
 import { playSound } from './soundManager'; // Import sound-related functions from soundManager
 
 export default function QuizResult() {
-  const { totalPoints, categoryId } = useLocalSearchParams();   // Reading game results which have been set by Quiz view when navigating here
-  const [sound, setSound] = useState(null);
+  const { totalPoints, categoryId } = useLocalSearchParams(); // Reading game results which have been set by Quiz view when navigating here
+  // const [sound, setSound] = useState(null);
   const [username, setUsername] = useState('');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);  // State for checking if logged in
-  const [ leaderboardPosition, setLeaderboardPosition ] = useState(null);   // State for showing leaderboard position
-  const [ isPersonalRecord, setIsPersonalRecord ] = useState(false)   // State for showing personal record
-  const router = useRouter();  // Initialize router
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // State for checking if logged in
+  const [leaderboardPosition, setLeaderboardPosition] = useState(null); // State for showing leaderboard position
+  const [isPersonalRecord, setIsPersonalRecord] = useState(false); // State for showing personal record
+  const router = useRouter(); // Initialize router
 
   // Paths to the sound files
   const sounds = {
@@ -21,7 +21,7 @@ export default function QuizResult() {
     personal: require('../assets/sounds/personalRecord.mp3'),
     leaderboard: require('../assets/sounds/leaderboardScore.wav'),
     noRecord: require('../assets/sounds/noRecord.wav'),
-  };  
+  };
 
   // Fetch the username from AsyncStorage when the component mounts
   useEffect(() => {
@@ -30,10 +30,13 @@ export default function QuizResult() {
         const storedUsername = await AsyncStorage.getItem('username'); // Retrieve username from storage
         if (storedUsername) {
           setUsername(storedUsername); // Set the username if found
-          setIsLoggedIn(true);  // Mark as logged in
+          setIsLoggedIn(true); // Mark as logged in
         } else {
-          Alert.alert('Sorry', "You are not logged in, so we couldn't save your score!");
-          setIsLoggedIn(false);  // Not logged in
+          Alert.alert(
+            'Sorry',
+            "You are not logged in, so we couldn't save your score!"
+          );
+          setIsLoggedIn(false); // Not logged in
         }
       } catch (error) {
         console.error('Error fetching username from storage:', error);
@@ -45,26 +48,29 @@ export default function QuizResult() {
   }, []); // Empty dependency array to ensure it runs once when the component mounts
 
   // Sends user points to backend and sets leaderboard results to the UI
-  async function postPlayerPoints(username, score, category, ) {
+  async function postPlayerPoints(username, score, category) {
     try {
-      const response = await fetch('https://quizzleapp.lm.r.appspot.com/leaderboard', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json', // Telling backend it's receiving json
-        },
-        body: JSON.stringify({
-          username,
-          score: parseInt(score, 10),     // Ensure score is an integer
-          category: parseInt(category, 10), // Ensure category is an integer
-        }),
-      });
+      const response = await fetch(
+        'https://quizzleapp.lm.r.appspot.com/leaderboard',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json', // Telling backend it's receiving json
+          },
+          body: JSON.stringify({
+            username,
+            score: parseInt(score, 10), // Ensure score is an integer
+            category: parseInt(category, 10), // Ensure category is an integer
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error('HTTP error! status: ${response.status}'); // Helps catching network errors or incorrect http status codes
       }
 
       const data = await response.json();
-    // Process leaderboard and personal record from response
+      // Process leaderboard and personal record from response
       console.log('Response data:', data);
       setLeaderboardPosition(data.leaderboardPosition);
       setIsPersonalRecord(data.isPersonalRecord);
@@ -76,31 +82,37 @@ export default function QuizResult() {
   // When view initializes, sending game results to backend
   useEffect(() => {
     if (username && totalPoints && categoryId) {
-      console.log('username:', username, 'totalPoints:', totalPoints, 'categoryId:', categoryId); // This is for debugging
-      postPlayerPoints(username,totalPoints, categoryId);
+      console.log(
+        'username:',
+        username,
+        'totalPoints:',
+        totalPoints,
+        'categoryId:',
+        categoryId
+      ); // This is for debugging
+      postPlayerPoints(username, totalPoints, categoryId);
     }
   }, [username, totalPoints, categoryId]); // Only run when username is fetched and totalPoints/categoryId are valid
 
-
-// Play sounds based on leaderboard position and personal record
-useEffect(() => {
-  if (leaderboardPosition !== null || isPersonalRecord) {
-    // Prioritize personal record and leaderboard sounds, and only play one sound.
-    if (isPersonalRecord && leaderboardPosition === -1) {
-      // Play personal record sound when set a record but not on the leaderboard
-      playSound(sounds.personal);
-    } else if (leaderboardPosition === -1 && !isPersonalRecord) {
-      // Only play noRecord if no personal record and no leaderboard placement
-      playSound(sounds.noRecord);
-    } else if (leaderboardPosition !== null && !isPersonalRecord) {
-      // Leaderboard placement but no personal record
-      playSound(sounds.leaderboard);
-    } else if (leaderboardPosition !== null && isPersonalRecord) {
-      // Double victory: personal record + leaderboard 
-      playSound(sounds.doubleScore);
+  // Play sounds based on leaderboard position and personal record
+  useEffect(() => {
+    if (leaderboardPosition !== null || isPersonalRecord) {
+      // Prioritize personal record and leaderboard sounds, and only play one sound.
+      if (isPersonalRecord && leaderboardPosition === -1) {
+        // Play personal record sound when set a record but not on the leaderboard
+        playSound(sounds.personal);
+      } else if (leaderboardPosition === -1 && !isPersonalRecord) {
+        // Only play noRecord if no personal record and no leaderboard placement
+        playSound(sounds.noRecord);
+      } else if (leaderboardPosition !== null && !isPersonalRecord) {
+        // Leaderboard placement but no personal record
+        playSound(sounds.leaderboard);
+      } else if (leaderboardPosition !== null && isPersonalRecord) {
+        // Double victory: personal record + leaderboard
+        playSound(sounds.doubleScore);
+      }
     }
-  }
-}, [leaderboardPosition, isPersonalRecord]); // Only trigger when these states change
+  }, [leaderboardPosition, isPersonalRecord]); // Only trigger when these states change
 
   // Returns UI element which shows leaderboard-related information
   // Renders both leaderboard and personal record conditions
@@ -108,24 +120,36 @@ useEffect(() => {
     if (isPersonalRecord && leaderboardPosition === -1) {
       return (
         <Text style={styles.quizResultText}>
-          🔥 It's a new personal record! 🔥{"\n"}Keep going!
+          🔥 It's a new personal record! 🔥{'\n'}Keep going!
         </Text>
       );
     }
     if (leaderboardPosition === -1) {
-      return <Text style={styles.quizResultText}>😞 Sorry! 😞{"\n"}You didn't reach the leaderboard this time.</Text>;
+      return (
+        <Text style={styles.quizResultText}>
+          😞 Sorry! 😞{'\n'}You didn't reach the leaderboard this time.
+        </Text>
+      );
     }
 
     if (leaderboardPosition !== null && isPersonalRecord) {
       return (
-        <Text style={styles.quizResultText}>🏆 Double victory! 🏆{"\n"}You've set a new personal record and reached leaderboard position {leaderboardPosition}!{"\n"}Keep up the amazing work! 🎉</Text>
+        <Text style={styles.quizResultText}>
+          🏆 Double victory! 🏆{'\n'}You've set a new personal record and
+          reached leaderboard position {leaderboardPosition}!{'\n'}Keep up the
+          amazing work! 🎉
+        </Text>
       );
     }
 
     if (leaderboardPosition !== null) {
-      return <Text style={styles.quizResultText}>🎉 Congratulations! 🎉{"\n"}You've reached leaderboard position {leaderboardPosition}!</Text>;
+      return (
+        <Text style={styles.quizResultText}>
+          🎉 Congratulations! 🎉{'\n'}You've reached leaderboard position{' '}
+          {leaderboardPosition}!
+        </Text>
+      );
     }
-
 
     return null;
   };
@@ -135,42 +159,44 @@ useEffect(() => {
       <View style={styles.contentContainerFull}>
         <Text style={styles.title}>Game ended</Text>
 
-        <Text style={styles.quizResultText}>You got {totalPoints} points! 🎯</Text>
+        <Text style={styles.quizResultText}>
+          You got {totalPoints} points! 🎯
+        </Text>
         {/* Display the special achievements message */}
         {renderSpecialAchievements()}
 
         <View style={styles.startButtonContainer}>
-        {/* Conditionally render login button if not logged in */}
-        {!isLoggedIn && (
-          <View>
-           <Text style={styles.quizResultText}>Login to save your next score!</Text>
+          {/* Conditionally render login button if not logged in */}
+          {!isLoggedIn && (
+            <View>
+              <Text style={styles.quizResultText}>
+                Login to save your next score!
+              </Text>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => router.push('/LoginScreen')} // Navigate to Login screen
+              >
+                <Text style={styles.buttonText}>Login</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* A button for playing a new game */}
           <TouchableOpacity
             style={styles.button}
-            onPress={() => router.push('/LoginScreen')}  // Navigate to Login screen
-          >
-            <Text style={styles.buttonText}>Login</Text>
-          </TouchableOpacity>
-          </View>
-        )}
-        
-        
-          {/* A button for playing a new game */}
-          <TouchableOpacity 
-            style={styles.button}
-            onPress={() => router.back()}  // Navigate to create quiz
+            onPress={() => router.back()} // Navigate to create quiz
           >
             <Text style={styles.buttonText}>Play again</Text>
           </TouchableOpacity>
-        
+
           {/* Button for Leaderboard */}
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.button}
-            onPress={() => router.replace('/leaderboard')}  // Navigate to Leaderboard screen
+            onPress={() => router.replace('/leaderboard')} // Navigate to Leaderboard screen
           >
             <Text style={styles.buttonText}>Leaderboard</Text>
           </TouchableOpacity>
         </View>
-         
       </View>
     </View>
   );
