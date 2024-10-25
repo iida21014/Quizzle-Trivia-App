@@ -1,21 +1,25 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import styles from './styles';
 import { handleScreenMusic } from './soundManager'; 
 
 const LoginScreen = () => {
-  const navigation = useNavigation();  // Call the hook as a function
+  const navigation = useNavigation(); 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false); // State for login confirmation modal
+  const [errorModalVisible, setErrorModalVisible] = useState(false); // State for error modal
+  const [errorMessage, setErrorMessage] = useState(''); // State for error message
+  const [loginSuccess, setLoginSuccess] = useState(false); // State to track successful login
 
   const sounds = {
-    allAroundMusic: require('../assets/sounds/allAround.wav'), // Quiz music file
+    allAroundMusic: require('../assets/sounds/allAround.wav'),
   };
 
-  handleScreenMusic(sounds.allAroundMusic); // This will start music when screen is in focus and stop it when the screen is not in focus
+  handleScreenMusic(sounds.allAroundMusic); 
 
   // Function to handle login
   const handleLogin = async () => {
@@ -32,28 +36,38 @@ const LoginScreen = () => {
       const data = await response.json();
 
       if (response.ok) {
-        await AsyncStorage.setItem('token', data.token); // Store the token securely
-        await AsyncStorage.setItem('username', username); // Store username in AsyncStorage
-        Alert.alert('Success', 'Login successful', [
-          {
-            text: 'OK',
-            onPress: () => {
-              navigation.reset({
-                index: 0, // Ensure the home screen is the only one in the stack
-                routes: [{ name: 'index' }], // Navigate to the 'index' screen
-              });
-            },
-          },
-        ]);
+        await AsyncStorage.setItem('token', data.token); 
+        await AsyncStorage.setItem('username', username); 
+        setLoginSuccess(true); // Set login success state
+        setConfirmModalVisible(true); // Show confirmation modal
       } else {
-        Alert.alert('Login failed', data.error || 'Invalid credentials');
+        setErrorMessage(data.error || 'Invalid credentials');
+        setErrorModalVisible(true); // Show error modal
       }
     } catch (error) {
       console.error('Error during login:', error);
-      Alert.alert('Error', 'Something went wrong. Please try again.');
+      setErrorMessage('Something went wrong. Please try again.');
+      setErrorModalVisible(true); // Show error modal
     } finally {
       setLoading(false);
     }
+  };
+
+  const confirmLogin = () => {
+    // Trigger login process
+    handleLogin();
+  };
+
+  const handleConfirmLogin = () => {
+    setConfirmModalVisible(false); // Close confirmation modal
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'index' }], // Proceed with navigation on confirmation
+    });
+  };
+
+  const handleErrorModalClose = () => {
+    setErrorModalVisible(false); // Close error modal
   };
 
   return (
@@ -64,7 +78,7 @@ const LoginScreen = () => {
         placeholder="Username"
         value={username}
         onChangeText={setUsername}
-        autoCorrect={false} // Disable autocorrect for username input
+        autoCorrect={false} 
       />
       <TextInput
         style={styles.input}
@@ -72,10 +86,9 @@ const LoginScreen = () => {
         secureTextEntry
         value={password}
         onChangeText={setPassword}
-        autoCapitalize="none" // Prevent auto-capitalizing password
+        autoCapitalize="none" 
       />
       
-      {/* Show loading indicator if login is in progress */}
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
@@ -84,8 +97,8 @@ const LoginScreen = () => {
             styles.button,
             (!username || !password || loading) && styles.disabledButton,
           ]}
-          onPress={handleLogin}
-          disabled={!username || !password || loading} // Disable button if fields are empty or loading
+          onPress={confirmLogin} // Trigger login process on press
+          disabled={!username || !password || loading} 
         >
           <Text style={styles.buttonText}>
             {loading ? 'Logging in...' : 'Login'}
@@ -95,10 +108,54 @@ const LoginScreen = () => {
       <Text>Don't have an account?</Text>
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.replace('RegisterScreen')} // Navigate to the Register Screen
+        onPress={() => navigation.replace('RegisterScreen')} 
       >
         <Text style={styles.buttonText}>Register</Text>
       </TouchableOpacity>
+
+      {/* Login Confirmation Modal */}
+      <Modal
+        transparent={true}
+        animationType="slide"
+        visible={confirmModalVisible}
+        onRequestClose={() => setConfirmModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Confirm Login</Text>
+            <Text style={styles.modalMessage}>
+              Login successful
+            </Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity onPress={handleConfirmLogin} style={styles.modalButton}>
+                <Text style={styles.buttonText}>OK</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Error Modal */}
+      <Modal
+        transparent={true}
+        animationType="slide"
+        visible={errorModalVisible}
+        onRequestClose={handleErrorModalClose}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Error</Text>
+            <Text style={styles.modalMessage}>
+              {errorMessage}
+            </Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity onPress={handleErrorModalClose} style={styles.modalButton}>
+                <Text style={styles.buttonText}>OK</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };

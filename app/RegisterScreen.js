@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Alert, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native'; // Remove TypeScript-specific type
-import styles from './styles';  // Ensure it's pointing to the correct styles file
+import { View, Text, TextInput, TouchableOpacity, Modal } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import styles from './styles'; 
 import { handleScreenMusic } from './soundManager';
 
 const RegisterScreen = () => {
@@ -9,12 +9,15 @@ const RegisterScreen = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false); // State for modal visibility
+  const [message, setMessage] = useState(''); // State for modal message
+  const [success, setSuccess] = useState(false); // State for success or failure
 
   const sounds = {
-    allAroundMusic: require('../assets/sounds/allAround.wav'),
+    allAroundMusic: require('../assets/sounds/allAround.wav'),  // This will start music when screen is in focus and stop it when the screen is not in focus
   };
 
-  handleScreenMusic(sounds.allAroundMusic);  // This will start music when screen is in focus and stop it when the screen is not in focus
+  handleScreenMusic(sounds.allAroundMusic); 
 
   // Function to handle registering a user
   const handleRegister = async () => {
@@ -31,30 +34,33 @@ const RegisterScreen = () => {
       const data = await response.json();
 
       if (response.ok) {
-        Alert.alert(
-          'Success',
-          'User registered successfully',
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                navigation.navigate('LoginScreen'); // Navigate to login screen after registration
-              },
-            },
-          ],
-          { cancelable: false } // Prevent dismissal by tapping outside
-        );
+        // Set message and show success modal
+        setMessage('User registered successfully');
+        setSuccess(true);
+        setModalVisible(true);
       } else {
-        Alert.alert('Registration failed', data.error || 'Failed to register');
+        // Set message and show error modal
+        setMessage(data.error || 'Failed to register');
+        setSuccess(false);
+        setModalVisible(true);
       }
     } catch (error) {
       console.error('Error during registration', error);
-      Alert.alert('Error', 'Something went wrong.');
+      setMessage('Something went wrong.');
+      setSuccess(false);
+      setModalVisible(true);
     } finally {
       setLoading(false);
     }
   };
-  
+
+  const handleModalClose = () => {
+    setModalVisible(false); // Close modal
+    if (success) {
+      navigation.navigate('LoginScreen'); // Navigate to login screen if successful
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Register</Text>
@@ -72,7 +78,7 @@ const RegisterScreen = () => {
         onChangeText={setPassword}
       />
       <TouchableOpacity
-        style={[styles.button, loading && styles.disabledButton]} // Apply different styles if loading
+        style={[styles.button, loading && styles.disabledButton]}
         onPress={handleRegister}
         disabled={loading}
       >
@@ -80,6 +86,26 @@ const RegisterScreen = () => {
           {loading ? 'Registering...' : 'Register'}
         </Text>
       </TouchableOpacity>
+
+      {/* Registration Confirmation Modal */}
+      <Modal
+        transparent={true}
+        animationType="slide"
+        visible={modalVisible}
+        onRequestClose={handleModalClose}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>{success ? 'Success' : 'Error'}</Text>
+            <Text style={styles.modalMessage}>{message}</Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity onPress={handleModalClose} style={styles.modalButton}>
+                <Text style={styles.buttonText}>OK</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };

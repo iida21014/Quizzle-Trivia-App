@@ -1,21 +1,22 @@
 import { useEffect, useState } from 'react';
-import { View, Text, Alert, TouchableOpacity } from 'react-native';
-import { useLocalSearchParams, Link } from 'expo-router';
+import { View, Text, TouchableOpacity, Modal } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 import styles from './styles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { playSound } from './soundManager'; // Import sound-related functions from soundManager
+import { playSound } from './soundManager';
 
 export default function QuizResult() {
-  const { totalPoints, categoryId } = useLocalSearchParams(); // Reading game results which have been set by Quiz view when navigating here
-  // const [sound, setSound] = useState(null);
+  const { totalPoints, categoryId } = useLocalSearchParams(); // Reading game results which have been set by Quiz view when navigating here 
   const [username, setUsername] = useState('');
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // State for checking if logged in
-  const [leaderboardPosition, setLeaderboardPosition] = useState(null); // State for showing leaderboard position
-  const [isPersonalRecord, setIsPersonalRecord] = useState(false); // State for showing personal record
-  const router = useRouter(); // Initialize router
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [leaderboardPosition, setLeaderboardPosition] = useState(null);
+  const [isPersonalRecord, setIsPersonalRecord] = useState(false);
+  const [loginModalVisible, setLoginModalVisible] = useState(false); // State for login modal
+  const [errorModalVisible, setErrorModalVisible] = useState(false); // State for error modal
+  const [errorMessage, setErrorMessage] = useState(''); // State for error message
+  const router = useRouter();
 
-  // Paths to the sound files
   const sounds = {
     doubleScore: require('../assets/sounds/doubleScore.wav'),
     personal: require('../assets/sounds/personalRecord.mp3'),
@@ -29,23 +30,20 @@ export default function QuizResult() {
       try {
         const storedUsername = await AsyncStorage.getItem('username'); // Retrieve username from storage
         if (storedUsername) {
-          setUsername(storedUsername); // Set the username if found
-          setIsLoggedIn(true); // Mark as logged in
+          setUsername(storedUsername);
+          setIsLoggedIn(true);
         } else {
-          Alert.alert(
-            'Sorry',
-            "You are not logged in, so we couldn't save your score!"
-          );
-          setIsLoggedIn(false); // Not logged in
+          setLoginModalVisible(true); // Show modal if not logged in
         }
       } catch (error) {
         console.error('Error fetching username from storage:', error);
-        Alert.alert('Error', 'An error occurred while fetching the username');
+        setErrorMessage('An error occurred while fetching the username');
+        setErrorModalVisible(true); // Show error modal on exception
       }
     };
 
     getUsername();
-  }, []); // Empty dependency array to ensure it runs once when the component mounts
+  }, []);
 
   // Sends user points to backend and sets leaderboard results to the UI
   async function postPlayerPoints(username, score, category) {
@@ -55,12 +53,12 @@ export default function QuizResult() {
         {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json', // Telling backend it's receiving json
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             username,
-            score: parseInt(score, 10), // Ensure score is an integer
-            category: parseInt(category, 10), // Ensure category is an integer
+            score: parseInt(score, 10),
+            category: parseInt(category, 10),
           }),
         }
       );
@@ -76,6 +74,8 @@ export default function QuizResult() {
       setIsPersonalRecord(data.isPersonalRecord);
     } catch (error) {
       console.error('Could not save leaderboard points', error);
+      setErrorMessage('Could not save your score. Please try again.');
+      setErrorModalVisible(true); // Show error modal on exception
     }
   }
 
@@ -89,30 +89,21 @@ export default function QuizResult() {
         totalPoints,
         'categoryId:',
         categoryId
-      ); // This is for debugging
-      postPlayerPoints(username, totalPoints, categoryId);
+      );
+      postPlayerPoints(username, totalPoints, categoryId); // Only run when username is fetched and totalPoints/categoryId are valid
     }
-  }, [username, totalPoints, categoryId]); // Only run when username is fetched and totalPoints/categoryId are valid
+  }, [username, totalPoints, categoryId]);
 
   // Play sounds based on leaderboard position and personal record
   useEffect(() => {
-    if (leaderboardPosition !== null 
-) {
-      // Prioritize personal record and leaderboard sounds, and only play one sound.
+    if (leaderboardPosition !== null) {
       if (isPersonalRecord && leaderboardPosition === -1) {
-        // Play personal record sound when set a record but not on the leaderboard
         playSound(sounds.personal);
-
       } else if (leaderboardPosition === -1 && !isPersonalRecord) {
-        // Only play noRecord if no personal record and no leaderboard placement
         playSound(sounds.noRecord);
-
       } else if (leaderboardPosition !== null && !isPersonalRecord) {
-        // Leaderboard placement but no personal record
         playSound(sounds.leaderboard);
-        
       } else if (leaderboardPosition !== null && isPersonalRecord) {
-        // Double victory: personal record + leaderboard
         playSound(sounds.doubleScore);
       }
     }
@@ -158,6 +149,16 @@ export default function QuizResult() {
     return null;
   };
 
+  // Function to close the login modal
+  const handleLoginModalClose = () => {
+    setLoginModalVisible(false); // Close login modal
+  };
+
+  // Function to close the error modal
+  const handleErrorModalClose = () => {
+    setErrorModalVisible(false); // Close error modal
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.contentContainerFull}>
@@ -178,7 +179,7 @@ export default function QuizResult() {
               </Text>
               <TouchableOpacity
                 style={styles.button}
-                onPress={() => router.push('/LoginScreen')} // Navigate to Login screen
+                onPress={() => router.push('/LoginScreen')}
               >
                 <Text style={styles.buttonText}>Login</Text>
               </TouchableOpacity>
@@ -188,20 +189,64 @@ export default function QuizResult() {
           {/* A button for playing a new game */}
           <TouchableOpacity
             style={styles.button}
-            onPress={() => router.back()} // Navigate to create quiz
+            onPress={() => router.back()}
           >
             <Text style={styles.buttonText}>Play again</Text>
           </TouchableOpacity>
-
+          
           {/* Button for Leaderboard */}
           <TouchableOpacity
             style={styles.button}
-            onPress={() => router.replace('/leaderboard')} // Navigate to Leaderboard screen
+            onPress={() => router.replace('/leaderboard')}
           >
             <Text style={styles.buttonText}>Leaderboard</Text>
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* Login Modal */}
+      <Modal
+        transparent={true}
+        animationType="slide"
+        visible={loginModalVisible}
+        onRequestClose={handleLoginModalClose}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Not Logged In</Text>
+            <Text style={styles.modalMessage}>
+              You need to log in to save your score.
+            </Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity onPress={handleLoginModalClose} style={styles.modalButton}>
+                <Text style={styles.buttonText}>OK</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Error Modal */}
+      <Modal
+        transparent={true}
+        animationType="slide"
+        visible={errorModalVisible}
+        onRequestClose={handleErrorModalClose}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Error</Text>
+            <Text style={styles.modalMessage}>
+              {errorMessage}
+            </Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity onPress={handleErrorModalClose} style={styles.modalButton}>
+                <Text style={styles.buttonText}>OK</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

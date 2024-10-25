@@ -7,7 +7,7 @@ const screenWidth = screenDimensions.width;
 const screenHeight = screenDimensions.height;
 
 const styles = StyleSheet.create({
-  // Shared styles accross the application
+  // Shared styles across the application
   button: {
     backgroundColor: '#65558F',
     width: 200,
@@ -56,6 +56,53 @@ const styles = StyleSheet.create({
     color: '#333',
     textAlign: 'left',
     marginBottom: 20,
+  },
+  
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: '80%',
+    backgroundColor: '#ffffff',
+    borderRadius: 15,
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#65558F',
+  },
+  modalMessage: {
+    textAlign: 'center',
+    marginBottom: 20,
+    color: '#333',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  modalButton: {
+    flex: 1,
+    padding: 10,
+    alignItems: 'center',
+    borderRadius: 25,
+    marginHorizontal: 5,
+    backgroundColor: '#65558F',
   },
 
   // Home view styles

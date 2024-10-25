@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
 import styles from './styles';
-import { View, Text, FlatList, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, FlatList, ActivityIndicator, Modal, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { handleScreenMusic} from './soundManager'; 
-
+import { handleScreenMusic } from './soundManager'; 
 
 const LeaderboardScreen = () => {  
-  const [selectedCategoryId, setSelectedCategoryId] = useState(0); // State for category
+  const [selectedCategoryId, setSelectedCategoryId] = useState(0); 
   const [index, setIndex] = useState(0);
   const [routes, setRoutes] = useState([
     { key: 'allUsers', title: 'All' }, // Start with only the "All" tab
@@ -19,7 +18,6 @@ const LeaderboardScreen = () => {
   };
 
   handleScreenMusic(sounds.allAroundMusic); // This will start music when screen is in focus and stop it when the screen is not in focus
-
 
   const [leaderboardsView, setLeaderboardsView] = useState({
     allUsers: [],
@@ -32,32 +30,35 @@ const LeaderboardScreen = () => {
   });
 
   const [username, setUsername] = useState('');
+  const [loginModalVisible, setLoginModalVisible] = useState(false); // State for login modal
+  const [errorModalVisible, setErrorModalVisible] = useState(false); // State for error modal
+  const [errorMessage, setErrorMessage] = useState(''); // State for error message
 
-// Fetch the username from AsyncStorage when the component mounts
-useEffect(() => {
-  const getUsername = async () => {
-    try {
-      const storedUsername = await AsyncStorage.getItem('username'); // Retrieve username from storage
-      if (storedUsername) {
-        setUsername(storedUsername); // Set the username if found
+  // Fetch the username from AsyncStorage when the component mounts
+  useEffect(() => {
+    const getUsername = async () => {
+      try {
+        const storedUsername = await AsyncStorage.getItem('username'); // Retrieve username from storage
+        if (storedUsername) {
+          setUsername(storedUsername); // Set the username if found
 
-        // Add the "You" tab when a user is logged in
-        setRoutes([
-          { key: 'allUsers', title: 'All' },
-          { key: 'currentUser', title: 'You' }
-        ]);
-      } else {
-        Alert.alert('Login', 'Login to see your personal scores');
+          // Add the "You" tab when a user is logged in
+          setRoutes([
+            { key: 'allUsers', title: 'All' },
+            { key: 'currentUser', title: 'You' }
+          ]);
+        } else {
+          setLoginModalVisible(true); // Show modal if not logged in
+        }
+      } catch (error) {
+        console.error('Error fetching username from storage:', error);
+        setErrorMessage('An error occurred while fetching the username');
+        setErrorModalVisible(true); // Show error modal on exception
       }
-    } catch (error) {
-      console.error('Error fetching username from storage:', error);
-      Alert.alert('Error', 'An error occurred while fetching the username');
-    }
-  };
+    };
 
-  getUsername();
-}, []); // Empty dependency array to ensure it runs once when the component mounts
-
+    getUsername();
+  }, []); 
 
   const categories = [
     { id: 0, name: 'All' },
@@ -77,16 +78,16 @@ useEffect(() => {
   const fetchLeaderboard = async (categoryId = 0, user = '') => {
     try {
       let url = `https://quizzleapp.lm.r.appspot.com/leaderboard?category=${categoryId}`;
-
       if (user) {
         url += `&username=${encodeURIComponent(user)}`;
       }
 
       const response = await fetch(url);
       const data = await response.json();
-      return data;  // Return the data for individual view
+      return data;  
     } catch (error) {
-      Alert.alert('Error', 'Failed to fetch leaderboard data.');
+      setErrorMessage('Failed to fetch leaderboard data.');
+      setErrorModalVisible(true); // Show error modal on exception
       return [];
     }
   };
@@ -94,7 +95,7 @@ useEffect(() => {
   // Fetch data for both 'allUsers' and 'currentUser' tab when category changes
   useEffect(() => {
     const fetchData = async () => {
-      // Fetch data for 'allUsers'
+       // Fetch data for 'allUsers'
       setLoadingView(prev => ({ ...prev, allUsers: true }));
       const allUsersData = await fetchLeaderboard(selectedCategoryId);
       setLeaderboardsView(prev => ({ ...prev, allUsers: allUsersData }));
@@ -121,11 +122,9 @@ useEffect(() => {
         <Text style={styles.rank}>
           {index + 1}.
         </Text>
-  
         <Text style={[styles.username, item.username === username ? styles.yourUsername : null]}>
-          {item.username}  {/* Username in bold if it matches current user */}
+          {item.username}
         </Text>
-  
         <Text style={styles.score}>
           {item.score} p 
         </Text>
@@ -137,35 +136,34 @@ useEffect(() => {
   const renderLeaderboardView = () => (
     <View style={styles.container}>
       <View style={styles.contentContainerFull}>
-      <Text style={styles.title}>🏆 TOP 10 scores 🏆</Text>
-      <Text>From the category:</Text>
-      <Picker
-        selectedValue={selectedCategoryId}
-        onValueChange={(itemValue) => setSelectedCategoryId(itemValue)}
-      >
-        {categories.map(({ id, name }) => (
-          <Picker.Item key={id} label={name} value={id} />
-        ))}
-      </Picker>
+        <Text style={styles.title}>🏆 TOP 10 scores 🏆</Text>
+        <Text>From the category:</Text>
+        <Picker
+          selectedValue={selectedCategoryId}
+          onValueChange={(itemValue) => setSelectedCategoryId(itemValue)}
+        >
+          {categories.map(({ id, name }) => (
+            <Picker.Item key={id} label={name} value={id} />
+          ))}
+        </Picker>
 
-      
-      {loadingView.allUsers ? (
-        <ActivityIndicator size="large" color="#0000ff" />
-      ) : (
-        <>
+        {loadingView.allUsers ? (
+          <ActivityIndicator size="large" color="#0000ff" />
+        ) : (
+          <>
             {leaderboardsView.allUsers.length === 0 ? (
-              <Text style={styles.noScores}>No scores yet 😢</Text>  /* Show this message when there's no data */
-      ) : (
-        <FlatList
-          style={styles.leaderboardStyle}
-          keyExtractor={keyHandler}
-          data={leaderboardsView.allUsers}
-          renderItem={renderLeaderboard}
-        />
+              <Text style={styles.noScores}>No scores yet 😢</Text>
+            ) : (
+              <FlatList
+                style={styles.leaderboardStyle}
+                keyExtractor={keyHandler}
+                data={leaderboardsView.allUsers}
+                renderItem={renderLeaderboard}
+              />
+            )}
+          </>
         )}
-        </>
-      )}
-    </View>
+      </View>
     </View>
   );
 
@@ -173,34 +171,34 @@ useEffect(() => {
   const renderUserLeaderboardView = () => (
     <View style={styles.container}>
       <View style={styles.contentContainerFull}>
-      <Text style={styles.title}>🎉 Your TOP scores 🎉</Text>
-      <Text>From the category:</Text>
-      <Picker
-        selectedValue={selectedCategoryId}
-        onValueChange={(itemValue) => setSelectedCategoryId(itemValue)}
-      >
-        {categories.map(({ id, name }) => (
-          <Picker.Item key={id} label={name} value={id} />
-        ))}
-      </Picker>
-      
-      {loadingView.currentUser ? (
-        <ActivityIndicator size="large" color="#0000ff" />
-      ) : (
-        <>
+        <Text style={styles.title}>🎉 Your TOP scores 🎉</Text>
+        <Text>From the category:</Text>
+        <Picker
+          selectedValue={selectedCategoryId}
+          onValueChange={(itemValue) => setSelectedCategoryId(itemValue)}
+        >
+          {categories.map(({ id, name }) => (
+            <Picker.Item key={id} label={name} value={id} />
+          ))}
+        </Picker>
+        
+        {loadingView.currentUser ? (
+          <ActivityIndicator size="large" color="#0000ff" />
+        ) : (
+          <>
             {leaderboardsView.currentUser.length === 0 ? (
-              <Text style={styles.noScores}>No scores yet 😢</Text>  /* Show this message when there's no data */
-      ) : (
-        <FlatList
-          style={styles.leaderboardStyle}
-          keyExtractor={keyHandler}
-          data={leaderboardsView.currentUser}
-          renderItem={renderLeaderboard}
-        />
-      )}
-      </>
-      )}
-    </View>
+              <Text style={styles.noScores}>No scores yet 😢</Text>
+            ) : (
+              <FlatList
+                style={styles.leaderboardStyle}
+                keyExtractor={keyHandler}
+                data={leaderboardsView.currentUser}
+                renderItem={renderLeaderboard}
+              />
+            )}
+          </>
+        )}
+      </View>
     </View>
   );
 
@@ -210,21 +208,74 @@ useEffect(() => {
     currentUser: renderUserLeaderboardView,
   });
 
+  // Function to close the login modal
+  const handleLoginModalClose = () => {
+    setLoginModalVisible(false); // Close login modal
+  };
+
+  // Function to close the error modal
+  const handleErrorModalClose = () => {
+    setErrorModalVisible(false); // Close error modal
+  };
+
   return (
-    <TabView
-      navigationState={{ index, routes }}
-      renderScene={renderScene}
-      onIndexChange={setIndex}
-      initialLayout={{ width: '100%' }}
-      renderTabBar={props => <TabBar {...props}      
-      style={styles.tabBar}  // Apply the TabBar background style
-      labelStyle={styles.tabBarLabel}  // Apply the TabBar label style
-      activeColor={styles.tabBarActiveLabel.color}  // Apply the active label color
-      inactiveColor={styles.tabBarInactiveLabel.color}  // Apply the inactive label color
-      indicatorStyle={styles.tabBarIndicator}  // Apply the indicator style 
-      />}
-    />
-    
+    <View style={{ flex: 1 }}>
+      <TabView
+        navigationState={{ index, routes }}
+        renderScene={renderScene}
+        onIndexChange={setIndex}
+        initialLayout={{ width: '100%' }}
+        renderTabBar={props => <TabBar {...props}      
+          style={styles.tabBar}  
+          labelStyle={styles.tabBarLabel}  
+          activeColor={styles.tabBarActiveLabel.color}  
+          inactiveColor={styles.tabBarInactiveLabel.color}  
+          indicatorStyle={styles.tabBarIndicator}  
+        />}
+      />
+      
+      {/* Login Modal */}
+      <Modal
+        transparent={true}
+        animationType="slide"
+        visible={loginModalVisible}
+        onRequestClose={handleLoginModalClose}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Not Logged In</Text>
+            <Text style={styles.modalMessage}>
+              You need to log in to see your personal scores.
+            </Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity onPress={handleLoginModalClose} style={styles.modalButton}>
+                <Text style={styles.buttonText}>OK</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Error Modal */}
+      <Modal
+        transparent={true}
+        animationType="slide"
+        visible={errorModalVisible}
+        onRequestClose={handleErrorModalClose}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Error</Text>
+            <Text style={styles.modalMessage}>{errorMessage}</Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity onPress={handleErrorModalClose} style={styles.modalButton}>
+                <Text style={styles.buttonText}>OK</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </View>
   );
 }
 
