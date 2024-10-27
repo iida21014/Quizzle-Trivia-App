@@ -1,5 +1,0 @@
-runtime: nodejs20
-
-env_variables:
-  MONGODB_URI: 'mongodb+srv://databaseUser:IZMLlahATVA1P9zv@cluster0.cgvmo.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
-  JWT_SECRET: 'e8d13b0e5d6205592adfa692a73f7e9a4961250fb841a2ad1b25e60fd3204095f8da75cd91072d1eb7f48bfb4157ba2ca2f3daf8b559ed0472026328a23ba9f4'
